@@ -58,3 +58,14 @@ export function demoPhoto(name) {
 export const photoOf = item => item.photos?.[0] ?? demoPhoto(item.name)?.photo ?? null
 // A transparent cut-out if one exists (file name contains "-cut"), for the floating carousel.
 export const cutoutOf = item => item.photos?.find(u => /-cut\./.test(u)) ?? (item.photos?.[0] ? null : demoPhoto(item.name)?.cut ?? null)
+// The item shown in its parcel box, as a transparent sticker. An uploaded photo whose file name contains "-box"
+// wins; otherwise a stand-in box, then a cut-out, then the plain photo.
+// shortcut: admin has no dedicated "box photo" field yet; add one when the owner starts uploading box shots.
+const DEMO_BOX = { nuggets: 'box-nuggets', strips: 'box-strips', burger: 'box-burger' }
+export function boxOf(item) {
+  const own = item.photos?.find(u => /-box\./.test(u))
+  if (own) return own
+  const k = DEMO_BOX[kindOf(item.name)]
+  if (k && !item.photos?.length) return `/demo/${k === 'box-burger' && /spicy/i.test(item.name) ? 'box-spicy-burger' : k}.webp`
+  return cutoutOf(item) ?? photoOf(item)
+}
