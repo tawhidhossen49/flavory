@@ -1,27 +1,30 @@
 {
   "name": "snap",
-  "frameCount": 72,
+  "frameCount": 110,
   "desktop": {
     "dir": "desktop",
     "ext": "webp"
   },
-  "mobile": null,
+  "mobile": {
+    "dir": "mobile",
+    "ext": "webp"
+  },
   "poster": "poster.webp",
-  "edgeColor": "#2a1712",
-  "edgeColorEnd": "#26110c",
+  "edgeColor": "#351e18",
+  "edgeColorEnd": "#311712",
   "source": {
     "file": "snap-9x16.mp4",
-    "width": 720,
-    "height": 1280,
-    "fps": 30.0,
+    "width": 1080,
+    "height": 1920,
+    "fps": 60.0,
     "trim": [
       0.0,
-      3.3
+      3.6
     ]
   },
   "possibleCuts": [],
   "sizeMB": {
-    "desktop": 1.5,
-    "mobile": 0
+    "desktop": 4.5,
+    "mobile": 2.4
   }
 }

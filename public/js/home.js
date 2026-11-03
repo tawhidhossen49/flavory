@@ -1,4 +1,4 @@
-import { collection, craft, deliveryMap, footerFlourish, hero, packed, preloader, snap } from './chapters.js'
+import { collection, craft, deliveryMap, footerFlourish, hero, packed, preloader, rail, snap } from './chapters.js'
 import { clock, esc, tk } from './format.js'
 import { reveal, reviewHtml, safeUrl, setText, start } from './site.js'
 
@@ -66,3 +66,4 @@ document.getElementById('reviews').innerHTML = reviews.length
 
 footerFlourish()
 reveal()
+rail()

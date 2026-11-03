@@ -23,7 +23,7 @@ function renderHeader() {
       <a href="/" class="hdr-logo" aria-label="Flavory home"><img src="/brand/logo.webp" alt="Flavory" width="58" height="58"></a>
       <nav class="hdr-links" aria-label="Main">${links}</nav>
       <div class="hdr-end">
-        <a class="btn hdr-order" id="hdr-order" href="/menu/">Order</a>
+        <a class="btn hdr-order" id="hdr-order" href="/menu/"><span class="lbl">Order</span></a>
         <details class="hdr-menu">
           <summary class="burger" aria-label="Open menu">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
@@ -42,7 +42,7 @@ function renderFooter({ business: b, delivery: d }) {
       <div class="ftr-cta">
         <div><p class="kicker" data-reveal>Hungry?</p>
         <h2 class="ftr-big" data-t1>Fried fresh, <em>right now.</em></h2></div>
-        <a href="/menu/" class="btn pill" data-magnetic data-reveal>Order now <i aria-hidden="true">→</i></a>
+        <a href="/menu/" class="btn pill" data-magnetic data-reveal>Order now <i aria-hidden="true"><b>→</b></i></a>
       </div>
       <div class="ftr-cols">
         <div><h3>Hours</h3><p>Every day, ${clock(b.open)} – ${clock(b.close)}</p></div>
@@ -69,7 +69,7 @@ function renderCartBar() {
     const count = cart.count()
     const order = document.getElementById('hdr-order')
     if (order) {
-      order.textContent = count ? `Cart (${count})` : 'Order'
+      ;(order.querySelector('.lbl') ?? order).textContent = count ? `Cart (${count})` : 'Order'
       order.href = count ? '/cart/' : '/menu/'
     }
     const show = count > 0 && !onCart
@@ -79,10 +79,10 @@ function renderCartBar() {
       bar = document.createElement('div')
       bar.id = 'bar'
       bar.className = 'bar'
-      bar.innerHTML = '<a href="/cart/" class="btn block"></a>'
+      bar.innerHTML = '<a href="/cart/" class="btn block"><span class="lbl"></span></a>'
       document.body.append(bar)
     }
-    bar.firstChild.textContent = `View cart · ${tk(cart.total())}`
+    ;(bar.querySelector('.lbl') ?? bar.firstChild).textContent = `View cart · ${tk(cart.total())}`
   }
   paint()
   cart.subscribe(paint)
@@ -149,7 +149,7 @@ export function bindCards(root, items) {
     const item = byId.get(card.dataset.item)
     const o = chosen(card, item)
     cart.add({ option_id: o.id, item_id: item.id, name: item.name, label: o.label, price: o.price, photo: item.photos[0] ?? null })
-    flyToCart(btn)
+    flyToCart(btn, item.photos[0] ?? card.querySelector('.card-plate img')?.getAttribute('src'))
     const label = btn.querySelector('.add-label')
     label.textContent = 'Added'
     btn.classList.add('is-added')

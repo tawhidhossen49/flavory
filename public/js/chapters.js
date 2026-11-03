@@ -94,7 +94,8 @@ function whenNear(el, cb, margin = '120% 0px') {
 }
 
 // ---------------------------------------------------------------------------
-// Preloader: a gold drop falls, ripples out into the ring, the wordmark sharpens, the counter follows real loading.
+// Preloader: a gold drop falls and ripples into the ring, the wordmark rises letter by letter,
+// the counter follows real loading, then the screen parts like a curtain onto the hero.
 export function preloader(heroReady) {
   const el = document.querySelector('.preloader')
   if (!el) return Promise.resolve()
@@ -109,20 +110,42 @@ export function preloader(heroReady) {
   const ring = el.querySelector('.pl-ring'), L = ring.getTotalLength()
   const { chars } = Split.create(el.querySelector('.pl-word'), { type: 'chars' })
   const intro = gsap.timeline()
-    .fromTo('.pl-drop', { y: -40, scaleY: 1.3, transformOrigin: '50% 100%' }, { y: 124, scaleY: 1, duration: 0.6, ease: 'power2.in' })
-    .to('.pl-drop', { scaleX: 2.2, scaleY: 0.2, autoAlpha: 0, duration: 0.18, ease: 'power2.out' })
-    .fromTo('.pl-ripple', { scale: 0.2, autoAlpha: 0.9, transformOrigin: '50% 50%' }, { scale: 3.4, autoAlpha: 0, duration: 1.2, stagger: 0.18, ease: 'power2.out' }, '<')
+    .fromTo('.pl-drop', { y: -30, scaleY: 1.3, transformOrigin: '50% 100%' }, { y: 124, scaleY: 1, duration: 0.55, ease: 'power2.in' })
+    .to('.pl-drop', { scaleX: 2.4, scaleY: 0.15, autoAlpha: 0, duration: 0.16, ease: 'power2.out' })
+    .fromTo('.pl-ripple', { scale: 0.2, autoAlpha: 0.9, transformOrigin: '50% 50%' }, { scale: 3.4, autoAlpha: 0, duration: 1.2, stagger: 0.18, ease: 'power2.out', immediateRender: false }, '<')
     .fromTo(ring, { strokeDasharray: L, strokeDashoffset: L }, { strokeDashoffset: 0, duration: 1.1, ease: 'power2.inOut' }, '<0.05')
-    .from(chars, { autoAlpha: 0, y: 14, filter: 'blur(8px)', duration: 0.7, stagger: 0.05, ease: 'power3.out' }, '<0.1')
+    .from(chars, { yPercent: 60, autoAlpha: 0, filter: 'blur(6px)', duration: 0.8, stagger: 0.05, ease: 'power3.out' }, '<0.1')
+    .from('.pl-tag', { autoAlpha: 0, letterSpacing: '.8em', duration: 0.9, ease: 'power3.out' }, '<0.35')
+    .from('.pl-count', { autoAlpha: 0, duration: 0.5 }, '<')
 
   const cap = new Promise(r => setTimeout(r, 4000))
   return Promise.all([Promise.race([heroReady, cap]), intro.then()]).then(() => new Promise(resolve => {
     removeEventListener('seq:progress', onP)
     gsap.timeline({ onComplete: () => { el.remove(); motion.lenis?.start(); resolve() } })
       .to(shown, { v: 100, duration: 0.3, onUpdate: paint })
-      .to(el.querySelector('.pl-inner'), { scale: 0.9, autoAlpha: 0, duration: 0.4, ease: 'power2.in' })
-      .to(el, { yPercent: -100, duration: 0.9, ease: 'expo.inOut' }, '-=0.1')
+      .to(el.querySelector('.pl-inner'), { scale: 0.94, autoAlpha: 0, duration: 0.4, ease: 'power2.in' })
+      .to(el.querySelector('.pl-split.t'), { yPercent: -100, duration: 0.95, ease: 'expo.inOut' }, '-=0.05')
+      .to(el.querySelector('.pl-split.b'), { yPercent: 100, duration: 0.95, ease: 'expo.inOut' }, '<')
   }))
+}
+
+// Chapter rail: a quiet readout of where you are on the page (desktop only).
+export function rail() {
+  if (!live || !desk()) return
+  const r = document.createElement('div')
+  r.className = 'rail'
+  r.setAttribute('aria-hidden', 'true')
+  r.innerHTML = '<b></b><i></i><span></span>'
+  document.body.append(r)
+  const [num, bar, label] = r.children
+  document.querySelectorAll('[data-chapter]').forEach(sec => {
+    const [n, ...rest] = sec.dataset.chapter.split(' — ')
+    ST.create({
+      trigger: sec, start: 'top 55%', end: 'bottom 55%',
+      onToggle: s => { if (s.isActive) { num.textContent = n; label.textContent = rest.join(' — ').toUpperCase(); r.style.opacity = sec.classList.contains('chef-sec') ? 0 : 1 } },
+      onUpdate: s => bar.style.setProperty('--p', s.progress.toFixed(3)),
+    })
+  })
 }
 
 // ---------------------------------------------------------------------------
@@ -226,114 +249,143 @@ export function craft() {
 }
 
 // ---------------------------------------------------------------------------
-// 03 The break: the clip scrubs in an arched frame while CRUNCH tears in two.
+// 03 The break: an arch opens into a full cinematic frame. A viewfinder, a running timecode and a
+// crunch waveform that peaks exactly when the crust gives way.
 export function snap() {
   const sec = document.getElementById('snap')
-  if (!sec || !live) return
-  const title = sec.querySelector('[data-smoke]')
-  const { chars } = Split.create(title, { type: 'words,chars' })
-  gsap.from(chars, { autoAlpha: 0, y: 20, filter: desk() ? 'blur(14px)' : 'blur(0px)', duration: 1.3, stagger: { each: 0.03, from: 'random' }, ease: 'power2.out', scrollTrigger: { trigger: sec, start: 'top 40%', once: true } })
+  if (!sec) return
+  const wave = document.getElementById('snap-wave')
+  const pts = []
+  for (let i = 0; i <= 150; i++) {
+    const t = i / 150
+    const env = 1.5 + 19 * Math.exp(-(((t - 0.55) / 0.05) ** 2)) + 8 * Math.exp(-(((t - 0.66) / 0.07) ** 2)) + (t > 0.55 ? 5 * Math.exp(-(t - 0.55) * 7) : 0)
+    pts.push(`${i * 4} ${(23 + Math.sin(i * 1.9) * Math.cos(i * 0.41 + 1) * env).toFixed(1)}`)
+  }
+  wave.setAttribute('d', 'M' + pts.join(' L'))
+  const frame = sec.querySelector('.snap-frame')
+  if (!live) { sec.querySelectorAll('.snap-shade, .hud').forEach(el => { el.style.opacity = 1 }); return }
 
+  const L = wave.getTotalLength()
+  const tc = document.getElementById('snap-tc'), pct = document.getElementById('snap-pct')
+  const [w1, w2] = sec.querySelectorAll('.snap-word span')
+  const [l1, l2] = sec.querySelectorAll('.snap-copy h2 > span')
   const st = { tl: null }
+  const pad = n => String(n).padStart(2, '0')
+
   gsap.matchMedia().add({ d: '(min-width: 900px)', m: '(max-width: 899px)' }, c => {
-    const tl = gsap.timeline({ defaults: { ease: 'none' }, scrollTrigger: { trigger: sec, start: 'top top', end: c.conditions.d ? '+=150%' : '+=110%', scrub: 0.5, pin: sec.querySelector('.seq-stage'), anticipatePin: 1 } })
-    const [a, b] = sec.querySelectorAll('.snap-word span')
-    tl.fromTo(a, { xPercent: 12 }, { xPercent: -40, duration: 1 }, 0)
-      .fromTo(b, { xPercent: -12 }, { xPercent: 40, duration: 1 }, 0)
-      .fromTo('.snap-frame', { scale: 0.9, rotate: -3 }, { scale: 1, rotate: 0, duration: 0.6 }, 0)
+    const d = c.conditions.d
+    const soft = d ? 'blur(10px)' : 'blur(0px)'
+    const tl = gsap.timeline({
+      defaults: { ease: 'none' },
+      scrollTrigger: {
+        trigger: sec, start: 'top top', end: d ? '+=240%' : '+=190%', scrub: 0.6, pin: sec.querySelector('.seq-stage'), anticipatePin: 1,
+        onUpdate: s => {
+          const secs = s.progress * 3.6
+          tc.textContent = `00:00:${pad(Math.floor(secs))}:${pad(Math.floor((secs % 1) * 60))}`
+          pct.textContent = String(Math.round(s.progress * 100)).padStart(3, '0')
+        },
+      },
+    })
+    // The arch opens into the full frame (on desktop it also glides from the centre to its place on the right).
+    tl.fromTo(frame, { clipPath: d ? 'inset(14% 16% 12% 16% round 999px 999px 10px 10px)' : 'inset(17% 14% 24% 14% round 999px 999px 12px 12px)', x: () => d ? innerWidth / 2 - (frame.getBoundingClientRect().left - gsap.getProperty(frame, 'x') + frame.offsetWidth / 2) : 0 },
+      { clipPath: 'inset(0% 0% 0% 0% round 0px 0px 0px 0px)', x: 0, duration: 0.3, ease: 'power2.inOut' }, 0)
+      .fromTo(w1, { xPercent: 0 }, { xPercent: -55, autoAlpha: 0, duration: 0.32, ease: 'power2.in' }, 0)
+      .fromTo(w2, { xPercent: 0 }, { xPercent: 55, autoAlpha: 0, duration: 0.32, ease: 'power2.in' }, 0)
+      .to(sec.querySelector('.snap-shade'), { opacity: 1, duration: 0.12 }, 0.2)
+      .to(sec.querySelector('.hud'), { opacity: 1, duration: 0.08 }, 0.26)
+      .fromTo(sec.querySelector('.hud-focus'), { scale: 1.9, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: 0.1, ease: 'power3.out' }, 0.3)
+      .to(sec.querySelector('.hud-focus'), { autoAlpha: 0, duration: 0.06 }, 0.5)
+      .fromTo(sec.querySelector('.snap-copy .kicker'), { autoAlpha: 0, y: 30 }, { autoAlpha: 1, y: 0, duration: 0.06 }, 0.26)
+      .fromTo(l1, { autoAlpha: 0, y: 50, filter: soft }, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.08, ease: 'power2.out' }, 0.3)
+      .fromTo(l2, { autoAlpha: 0, y: 50, filter: soft }, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.08, ease: 'power2.out' }, 0.55)
+      .fromTo(sec.querySelectorAll('.snap-note, .wave, .wave-label'), { autoAlpha: 0, y: 20 }, { autoAlpha: 1, y: 0, duration: 0.06, stagger: 0.02 }, 0.6)
+      .fromTo(wave, { strokeDasharray: L, strokeDashoffset: L }, { strokeDashoffset: 0, duration: 0.7 }, 0.25)
       .to({}, { duration: 0.001 }, 1)
     st.tl = tl
     return () => tl.kill()
   })
   whenNear(sec, () => createSequence(sec.querySelector('canvas'), 'snap').then(seq => {
-    sec.querySelector('.snap-frame img').remove()
-    if (st.tl) frames(st.tl, seq, 0, 1)
+    seq.firstPass.then(() => sec.querySelector('.snap-frame > img')?.remove())
+    if (st.tl) frames(st.tl, seq, 0.08, 0.86)
   }))
 }
 
 // ---------------------------------------------------------------------------
-// 04 Signature collection: items orbit on a ring; swipe, drag, arrows or keys.
+// 04 The collection: tall photo panels. The open one is in full colour; the rest wait in shadow.
 export function collection(items) {
-  const stage = document.getElementById('col-stage')
-  if (!stage) return
+  const box = document.getElementById('panels')
+  if (!box) return
   const list = items
     .filter(i => i.available && i.item_options.length)
     .sort((a, b) => (b.badge === 'Best seller') - (a.badge === 'Best seller'))
-    .slice(0, 8)
-  if (!list.length) { stage.closest('section').hidden = true; return }
+    .slice(0, 6)
+  if (!list.length) { box.closest('section').hidden = true; return }
+  const pad = n => String(n).padStart(2, '0')
+  const count = document.getElementById('col-count')
 
-  const els = list.map(item => {
-    const el = document.createElement('div')
-    el.className = 'col-item'
-    const cut = cutoutOf(item), pic = photoOf(item)
-    el.innerHTML = cut ? `<img src="${esc(cut)}" alt="" loading="lazy" decoding="async">`
-      : `<div class="plate">${pic ? `<img src="${esc(pic)}" alt="" loading="lazy">` : artSvg(item.name)}</div>`
-    stage.append(el)
-    return el
-  })
-  const $ = id => document.getElementById(id)
-  const dots = $('col-dots')
-  dots.innerHTML = list.map((it, i) => `<button aria-label="Show ${esc(it.name)}" data-i="${i}"></button>`).join('')
-  let at = 0, option = null
+  box.innerHTML = list.map((it, i) => {
+    const pic = photoOf(it)
+    const opts = it.item_options
+    return `<article class="cp${i ? '' : ' on'}" role="listitem" tabindex="0" data-i="${i}" aria-expanded="${!i}" aria-label="${esc(it.name)}">
+      ${pic ? `<img class="cp-img" src="${esc(pic)}" alt="${esc(it.name)}" loading="lazy" decoding="async">` : `<div class="cp-img">${artSvg(it.name)}</div>`}
+      <div class="cp-shade"></div>
+      <div class="cp-head" aria-hidden="true"><span class="cp-num">${pad(i + 1)}</span><span class="cp-title">${esc(it.name)}</span></div>
+      <div class="cp-vert" aria-hidden="true"><span class="cp-num">${pad(i + 1)}</span><span>${esc(it.name)}</span></div>
+      <i class="corner a"></i><i class="corner b"></i><i class="corner c"></i><i class="corner d"></i>
+      <div class="cp-body">
+        <p class="cp-badge">${esc(it.badge ?? 'Fried to order')}</p>
+        <h3 class="cp-name">${esc(it.name)}</h3>
+        <p class="cp-desc">${esc(it.description)}</p>
+        ${opts.length > 1 ? `<fieldset class="opts"><legend class="sr">Choose a size</legend>${opts.map((o, k) =>
+          `<label class="opt"><input type="radio" name="cp-${i}" value="${k}"${k ? '' : ' checked'}><span>${esc(o.label)}</span></label>`).join('')}</fieldset>` : ''}
+        <div class="cp-buy"><span class="cp-price">${tk(opts[0].price)}</span><button class="btn pill cp-add" type="button"><span class="lbl">Add to order</span><i aria-hidden="true"><b>+</b></i></button></div>
+      </div>
+    </article>`
+  }).join('')
+  const panels = [...box.children]
+  let at = 0
 
-  function place(animate) {
-    const n = list.length, w = stage.clientWidth
-    const gap = w * (desk() ? 0.26 : 0.44)
-    els.forEach((el, i) => {
-      let d = (i - at) % n
-      if (d > n / 2) d -= n
-      if (d < -n / 2) d += n
-      const a = Math.abs(d)
-      const v = { x: d * gap, z: -a * 260, rotationY: -d * 26, scale: 1 - Math.min(a, 2) * 0.24, autoAlpha: a > 2 ? 0 : 1 - a * 0.42, zIndex: 10 - a, transformPerspective: 1200 }
-      if (live && animate) gsap.to(el, { ...v, duration: 0.9, ease: 'expo.out', overwrite: true })
-      else if (live) gsap.set(el, v)
-      else Object.assign(el.style, { transform: `translateX(${v.x}px) scale(${v.scale})`, opacity: v.autoAlpha, zIndex: v.zIndex })
+  function open(i) {
+    if (i === at) return
+    at = i
+    panels.forEach((p, k) => {
+      p.classList.toggle('on', k === i)
+      p.setAttribute('aria-expanded', String(k === i))
+      if (k === i) p.removeAttribute('data-cursor'); else p.dataset.cursor = 'OPEN'
     })
+    count.textContent = `${pad(i + 1)} / ${pad(panels.length)} · ${list[i].name.toUpperCase()}`
+    setTimeout(() => ST?.refresh(), 950) // panel heights change on phones
   }
-  function show(i, animate = true) {
-    at = (i + list.length) % list.length
-    const item = list[at]
-    option = item.item_options[0]
-    const ghost = $('col-ghost')
-    if (live && animate) gsap.fromTo(ghost, { autoAlpha: 0, y: 30 }, { autoAlpha: 1, y: 0, duration: 0.8 })
-    ghost.textContent = item.name.split(' ').pop().toUpperCase()
-    $('col-name').textContent = item.name
-    $('col-desc').textContent = item.description
-    $('col-opts').innerHTML = item.item_options.length > 1 ? `<fieldset class="opts"><legend class="sr">Choose a size</legend>${item.item_options.map((o, k) =>
-      `<label class="opt"><input type="radio" name="col-opt" value="${k}"${k ? '' : ' checked'}><span>${esc(o.label)}</span></label>`).join('')}</fieldset>` : ''
-    paintAdd()
-    dots.querySelectorAll('button').forEach((b, k) => b.setAttribute('aria-current', String(k === at)))
-    if (live && animate) gsap.from(['#col-name', '#col-desc'], { y: 18, autoAlpha: 0, duration: 0.7, stagger: 0.06 })
-    place(animate)
-  }
-  const paintAdd = (label = `Add · ${tk(option.price)}`) => { $('col-add').textContent = label }
+  panels.forEach((p, i) => { if (i) p.dataset.cursor = 'OPEN' })
+  count.textContent = `01 / ${pad(panels.length)} · ${list[0].name.toUpperCase()}`
 
-  $('col-opts').addEventListener('change', e => { option = list[at].item_options[Number(e.target.value)]; paintAdd() })
-  $('col-add').addEventListener('click', e => {
-    const item = list[at]
-    cart.add({ option_id: option.id, item_id: item.id, name: item.name, label: option.label, price: option.price, photo: photoOf(item) })
-    flyToCart(e.currentTarget)
-    paintAdd('Added')
-    setTimeout(() => paintAdd(), 1300)
+  // Desktop opens on hover (after a short pause so passing over does not flicker); everyone can click, tap or use the keyboard.
+  let intent = 0
+  panels.forEach((p, i) => {
+    p.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse' && desk()) { clearTimeout(intent); intent = setTimeout(() => open(i), 140) } })
+    p.addEventListener('pointerleave', () => clearTimeout(intent))
+    p.addEventListener('click', e => { if (!e.target.closest('.cp-body')) open(i) })
+    p.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target === p) { e.preventDefault(); open(i) } })
+    p.addEventListener('focus', () => { if (desk()) open(i) })
+    p.addEventListener('change', e => { p.querySelector('.cp-price').textContent = tk(list[i].item_options[Number(e.target.value)].price) })
+    p.querySelector('.cp-add').addEventListener('click', e => {
+      const item = list[i]
+      const o = item.item_options[Number(p.querySelector('input:checked')?.value ?? 0)]
+      cart.add({ option_id: o.id, item_id: item.id, name: item.name, label: o.label, price: o.price, photo: photoOf(item) })
+      flyToCart(e.currentTarget, photoOf(item))
+      const lbl = e.currentTarget.querySelector('.lbl')
+      lbl.textContent = 'Added'
+      setTimeout(() => { lbl.textContent = 'Add to order' }, 1300)
+    })
+    // A little depth: the photo drifts against the pointer, like a lens.
+    if (live && desk()) {
+      const img = p.querySelector('.cp-img')
+      const qx = gsap.quickTo(img, 'x', { duration: 0.9, ease: 'power3' }), qy = gsap.quickTo(img, 'y', { duration: 0.9, ease: 'power3' })
+      p.addEventListener('pointermove', e => { const r = p.getBoundingClientRect(); qx(((e.clientX - r.left) / r.width - 0.5) * -18); qy(((e.clientY - r.top) / r.height - 0.5) * -14) })
+      p.addEventListener('pointerleave', () => { qx(0); qy(0) })
+    }
   })
-  $('col-prev').addEventListener('click', () => show(at - 1))
-  $('col-next').addEventListener('click', () => show(at + 1))
-  dots.addEventListener('click', e => { const b = e.target.closest('button'); if (b) show(Number(b.dataset.i)) })
-  stage.tabIndex = 0
-  stage.addEventListener('keydown', e => { if (e.key === 'ArrowLeft') show(at - 1); if (e.key === 'ArrowRight') show(at + 1) })
-
-  // Swipe or drag sideways; vertical swipes still scroll the page.
-  let x0 = null
-  stage.addEventListener('pointerdown', e => { x0 = e.clientX })
-  addEventListener('pointerup', e => {
-    if (x0 === null) return
-    const dx = e.clientX - x0
-    x0 = null
-    if (Math.abs(dx) > 40) show(at + (dx < 0 ? 1 : -1))
-  })
-  addEventListener('resize', () => place(false))
-  show(0, false)
-  if (live) gsap.from(els, { y: 120, autoAlpha: 0, duration: 1.2, stagger: 0.08, scrollTrigger: { trigger: stage, start: 'top 80%', once: true }, onComplete: () => place(false) })
+  if (live) gsap.from(panels, { yPercent: 18, autoAlpha: 0, clipPath: 'inset(100% 0% 0% 0%)', duration: 1.3, stagger: 0.08, ease: 'expo.out', clearProps: 'clipPath', scrollTrigger: { trigger: box, start: 'top 85%', once: true } })
 }
 
 // ---------------------------------------------------------------------------

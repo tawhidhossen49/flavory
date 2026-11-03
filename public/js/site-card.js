@@ -26,6 +26,7 @@ export function cardHtml(item) {
     <div class="card-visual">
       <div class="card-plate">${pic ? photo(pic, item.name, '(min-width: 900px) 360px, (min-width: 640px) 50vw, 100vw') : artSvg(item.name)}</div>
       ${item.badge ? `<span class="badge">${esc(item.badge)}</span>` : ''}
+      <i class="corner a"></i><i class="corner b"></i><i class="corner c"></i><i class="corner d"></i>
     </div>
     <div class="card-body">
       <div class="card-head">
@@ -39,7 +40,7 @@ export function cardHtml(item) {
           ${opts.length > 1 ? `<fieldset class="opts"><legend class="sr">Choose a size for ${esc(item.name)}</legend>
             ${opts.map((o, i) => `<label class="opt"><input type="radio" name="opt-${esc(item.id)}" value="${esc(o.id)}"${i ? '' : ' checked'}><span>${esc(o.label)}</span></label>`).join('')}
           </fieldset>` : ''}
-          <button class="btn add block" data-add aria-live="polite"><span class="add-label">Add · ${tk(opts[0]?.price ?? 0)}</span>${PLUS}</button>`}
+          <button class="btn add block" data-add aria-live="polite"><span class="add-label lbl">Add · ${tk(opts[0]?.price ?? 0)}</span>${PLUS}</button>`}
       </div>
     </div>
     <span class="card-sheen" aria-hidden="true"></span>

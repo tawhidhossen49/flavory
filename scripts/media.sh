@@ -32,13 +32,14 @@ grade golden  10823653-hd_3840_2160_24fps.mp4    0.5 8.5  "$GRADE" 'PI/4'
 grade egg     13527970_3840_2160_25fps.mp4       0   6.2  "$GRADE" 'PI/5'
 grade packed  5336213-uhd_4096_2160_30fps.mp4    0   7.8  "$DARK"  'PI/3.4' 0.42
 grade_portrait crumb 15552079_2160_3840_25fps.mp4 0  8.8  "$DARK"  'PI/3.4'
-grade_portrait snap  15994005_1080_1920_60fps.mp4 0  3.3  "$SOFT" 'PI/4'
+# The break is shown full-screen, so it keeps its full 1080px width and a longer reach into the tender inside.
+ff -ss 0 -to 3.6 -i "$SRC/15994005_1080_1920_60fps.mp4" -an -vf "$SOFT,vignette=angle=PI/4.6,fps=60" -threads 4 -c:v libx264 -crf 12 -preset medium -pix_fmt yuv420p "$G/snap-9x16.mp4"
 
 # Scroll-scrubbed sequences
 python "$EXTRACT" "$G/fryer.mp4"  --name fryer  --out "$SEQ" --frames 120 --width 1600 --mobile-src "$G/fryer-9x16.mp4"  --mobile-width 720 --quality 62
 python "$EXTRACT" "$G/golden.mp4" --name golden --out "$SEQ" --frames 40  --width 1600 --mobile-src "$G/golden-9x16.mp4" --mobile-width 720 --quality 62
 python "$EXTRACT" "$G/packed.mp4" --name packed --out "$SEQ" --frames 90  --width 1600 --mobile-src "$G/packed-9x16.mp4" --mobile-width 720 --quality 62
-python "$EXTRACT" "$G/snap-9x16.mp4" --name snap --out "$SEQ" --frames 72 --width 720 --no-mobile --quality 66
+python "$EXTRACT" "$G/snap-9x16.mp4" --name snap --out "$SEQ" --frames 110 --width 1080 --mobile-src "$G/snap-9x16.mp4" --mobile-width 720 --quality 72
 
 # Looping clips: small H.264, no audio, keyframe every second so the browser can start anywhere
 loop() { local in=$1 out=$2 w=$3

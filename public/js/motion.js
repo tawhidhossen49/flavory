@@ -56,7 +56,50 @@ function cursor() {
   const x = gsap.quickTo(c, 'x', { duration: 0.35, ease: 'power3' })
   const y = gsap.quickTo(c, 'y', { duration: 0.35, ease: 'power3' })
   addEventListener('pointermove', e => { x(e.clientX); y(e.clientY) })
-  document.addEventListener('pointerover', e => c.classList.toggle('is-big', Boolean(e.target.closest('a, button, label, .card'))))
+  // Over controls the dot steps aside so the control's own hover can play; over big media it becomes a label.
+  document.addEventListener('pointerover', e => {
+    const labelled = e.target.closest('[data-cursor]')
+    const control = e.target.closest('a, button, label, input, select, textarea, summary')
+    c.classList.toggle('is-label', Boolean(labelled && !control))
+    c.classList.toggle('is-hidden', Boolean(control))
+    if (labelled) c.dataset.label = labelled.dataset.cursor
+  })
+}
+
+// Direction-aware fill: the button fills from the exact point the pointer came in.
+function fillFrom(b) {
+  b.addEventListener('pointerenter', e => {
+    const r = b.getBoundingClientRect()
+    b.style.setProperty('--fx', `${e.clientX - r.left}px`)
+    b.style.setProperty('--fy', `${e.clientY - r.top}px`)
+  })
+  b.addEventListener('pointerleave', e => {
+    const r = b.getBoundingClientRect()
+    b.style.setProperty('--fx', `${e.clientX - r.left}px`)
+    b.style.setProperty('--fy', `${e.clientY - r.top}px`)
+  })
+}
+
+// Wraps a control's text so it can roll to its duplicate on hover. Runs once per element.
+export function hoverKit(scope = document) {
+  scope.querySelectorAll('.btn:not([data-hk])').forEach(b => {
+    b.dataset.hk = '1'
+    if (!b.querySelector('.lbl')) {
+      const t = [...b.childNodes].find(n => n.nodeType === 3 && n.textContent.trim())
+      if (t) { const s = document.createElement('span'); s.className = 'lbl'; s.textContent = t.textContent.trim(); t.replaceWith(s, ' ') }
+    }
+    if (fine) fillFrom(b)
+  })
+  scope.querySelectorAll('.hdr-links a:not([data-hk]), .ftr li a:not([data-hk]), .link-arrow:not([data-hk])').forEach(a => {
+    a.dataset.hk = '1'
+    const text = a.textContent.trim()
+    a.setAttribute('aria-label', text)
+    const wrap = document.createElement('span')
+    wrap.className = 'roll-chars'
+    wrap.setAttribute('aria-hidden', 'true')
+    ;[...text].forEach((ch, i) => { const s = document.createElement('span'); s.textContent = ch; s.style.setProperty('--i', i); wrap.append(s) })
+    a.replaceChildren(wrap)
+  })
 }
 
 function magnetic(b) {
@@ -64,8 +107,8 @@ function magnetic(b) {
   const qy = gsap.quickTo(b, 'y', { duration: 0.4, ease: 'power3' })
   b.addEventListener('pointermove', e => {
     const r = b.getBoundingClientRect()
-    qx((e.clientX - r.left - r.width / 2) * 0.3)
-    qy((e.clientY - r.top - r.height / 2) * 0.3)
+    qx((e.clientX - r.left - r.width / 2) * 0.18)
+    qy((e.clientY - r.top - r.height / 2) * 0.22)
   })
   b.addEventListener('pointerleave', () => gsap.to(b, { x: 0, y: 0, duration: 0.8, ease: 'elastic.out(1, 0.4)' }))
 }
@@ -90,6 +133,7 @@ const onEnter = (trigger, start = 'top 88%') => ({ trigger, start, once: true })
 // Animates everything on the page that has not been animated yet. Safe to call after each render.
 export function reveal() {
   boot()
+  hoverKit()
   if (!live) return
 
   fresh('[data-t1]').forEach(h => Split.create(h, {
@@ -154,12 +198,14 @@ export function reveal() {
   ST.refresh()
 }
 
-export function flyToCart(from) {
+// A small photo of the dish flies along an arc into the cart.
+export function flyToCart(from, photo) {
   const target = document.querySelector('#bar a') ?? document.getElementById('hdr-order')
   if (!live || !target) return
   const a = from.getBoundingClientRect(), b = target.getBoundingClientRect()
   const dot = document.createElement('span')
   dot.className = 'fly-dot'
+  if (photo) dot.style.backgroundImage = `url("${encodeURI(photo)}")`
   document.body.append(dot)
   gsap.set(dot, { x: a.left + a.width / 2, y: a.top + a.height / 2 })
   gsap.timeline({ onComplete: () => dot.remove() })
