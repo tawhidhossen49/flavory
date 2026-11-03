@@ -18,7 +18,9 @@ function rewrite(url) {
 
 async function serveApi(req, res, target) {
   const url = new URL(target, `http://${req.headers.host}`)
-  const mod = await import(`file://${path.resolve('.' + url.pathname + '.js').replaceAll('\\', '/')}`)
+  const file = path.resolve('.' + url.pathname + '.js')
+  // the file's timestamp in the URL makes edits take effect without restarting
+  const mod = await import(`file://${file.replaceAll('\\', '/')}?v=${(await stat(file)).mtimeMs}`)
   const handler = mod[req.method]
   if (!handler) { res.writeHead(405).end(); return }
   const body = ['GET', 'HEAD'].includes(req.method) ? undefined : await new Promise(ok => {

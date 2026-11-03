@@ -1,3 +1,4 @@
+import { TURNSTILE_SITE_KEY } from '../config.js'
 import { db, h, icon } from './ui.js'
 
 const IDLE_LIMIT_MS = 12 * 60 * 60 * 1000
@@ -28,11 +29,14 @@ function loginScreen(message) {
     onsubmit: async e => {
       e.preventDefault()
       error.hidden = true
-      const res = await (await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.value, password: password.value, turnstile: e.target.elements['cf-turnstile-response']?.value }),
-      })).json()
+      let res
+      try {
+        res = await (await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email.value, password: password.value, turnstile: e.target.elements['cf-turnstile-response']?.value }),
+        })).json()
+      } catch { res = { error: 'Login is not reachable from here. Use the live site, or run npm run dev.' } }
       if (res.error) { error.textContent = res.error; error.hidden = false; return }
       await db.auth.setSession(res)
       route()
@@ -45,12 +49,11 @@ function loginScreen(message) {
     turnstile, error,
     h('button', { class: 'btn block' }, 'Log in')))
 
-  fetch('/api/content?page=contact').then(r => r.json()).then(({ turnstile_key: key }) => {
-    if (!key) return
+  if (TURNSTILE_SITE_KEY) {
     turnstile.className = 'cf-turnstile'
-    turnstile.dataset.sitekey = key
+    turnstile.dataset.sitekey = TURNSTILE_SITE_KEY
     document.head.append(h('script', { src: 'https://challenges.cloudflare.com/turnstile/v0/api.js', defer: true }))
-  })
+  }
 }
 
 function homeScreen() {

@@ -18,9 +18,10 @@ const logo = (src, size) => ({ type: 'img', props: { src, width: size, height: s
 
 function fullReceipt(r, src) {
   const width = 900
-  const height = 880 + r.lines.length * 58 + (r.discount ? 42 : 0)
+  const height = 920 + r.lines.length * 58 + (r.discount ? 42 : 0)
+  // satori adds padding and borders on top of width/height, so sizes here are inner sizes
   return [width, height, h('div', { width, height, background: PLUM, padding: 36, fontFamily: 'Montserrat', fontSize: 28, color: PLUM },
-    h('div', { flexDirection: 'column', width: '100%', background: IVORY, padding: '44px 52px', border: `2px solid ${GOLD}` },
+    h('div', { flexDirection: 'column', width: width - 72 - 104 - 4, height: height - 72 - 88 - 4, background: IVORY, padding: '44px 52px', border: `2px solid ${GOLD}` },
       h('div', { flexDirection: 'column', alignItems: 'center' },
         logo(src, 120),
         h('div', { fontFamily: 'Great Vibes', fontSize: 76, color: GOLD_INK, marginTop: 4 }, 'Flavory'),
@@ -45,11 +46,11 @@ function fullReceipt(r, src) {
 function preview(r, src) {
   const shown = r.lines.slice(0, 4)
   return [1200, 630, h('div', { width: 1200, height: 630, background: PLUM, fontFamily: 'Montserrat', fontSize: 30, padding: 40, gap: 48 },
-    h('div', { flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: 400, border: `2px solid ${GOLD}`, color: IVORY },
+    h('div', { flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: 396, height: 546, border: `2px solid ${GOLD}`, color: IVORY },
       logo(src, 180),
       h('div', { fontFamily: 'Great Vibes', fontSize: 84, color: GOLD, marginTop: 8 }, 'Flavory'),
       h('div', { fontFamily: 'Playfair', fontSize: 36, marginTop: 8 }, 'Order receipt')),
-    h('div', { flexDirection: 'column', flex: 1, background: IVORY, color: PLUM, padding: '32px 40px' },
+    h('div', { flexDirection: 'column', width: 672 - 80, height: 550 - 64, background: IVORY, color: PLUM, padding: '32px 40px' },
       h('div', { fontWeight: 600, fontSize: 34, marginBottom: 4 }, orderNo(r.order_no)),
       h('div', { fontSize: 24, marginBottom: 6 }, dateTime(r.created_at)),
       dash(),

@@ -1,5 +1,6 @@
 // Everything shared by the public pages: header, footer, cart bar, reveals and page data.
 import { cart } from './cart.js'
+import { SUPABASE_KEY, SUPABASE_URL } from './config.js'
 import { clock, esc, tk } from './format.js'
 
 export { cardHtml, isSoldOut } from './site-card.js'
@@ -12,14 +13,15 @@ const LINKS = [
 function renderHeader() {
   const el = document.getElementById('hdr')
   if (!el) return
+  const here = location.pathname.replace(/\/(index\.html)?$/, '') || '/'
   const links = LINKS.map(([href, label]) =>
-    `<a href="${href}"${location.pathname === href ? ' aria-current="page"' : ''}>${esc(label)}</a>`).join('')
+    `<a href="${href}/"${here === href ? ' aria-current="page"' : ''}>${esc(label)}</a>`).join('')
   el.innerHTML = `
     <div class="wrap hdr-in">
       <a href="/" class="hdr-logo" aria-label="Flavory home"><img src="/brand/logo.webp" alt="Flavory" width="58" height="58"></a>
       <nav class="hdr-links" aria-label="Main">${links}</nav>
       <div class="hdr-end">
-        <a class="btn hdr-order" id="hdr-order" href="/menu">Order</a>
+        <a class="btn hdr-order" id="hdr-order" href="/menu/">Order</a>
         <details class="hdr-menu">
           <summary class="burger" aria-label="Open menu">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
@@ -42,9 +44,9 @@ function renderFooter({ business: b, delivery: d }) {
         <div><h3>Flavory</h3><ul>
           <li><a href="tel:${esc(b.phone.replace(/\D/g, ''))}">${esc(b.phone)}</a></li>
           ${safeUrl(b.facebook) ? `<li><a href="${esc(safeUrl(b.facebook))}" rel="noopener noreferrer" target="_blank">Facebook</a></li>` : ''}
-          <li><a href="/privacy">Privacy Policy</a></li>
-          <li><a href="/terms">Terms</a></li>
-          <li><a href="/refund">Refund & Replacement</a></li>
+          <li><a href="/privacy/">Privacy Policy</a></li>
+          <li><a href="/terms/">Terms</a></li>
+          <li><a href="/refund/">Refund & Replacement</a></li>
         </ul></div>
       </div>
       <p class="ftr-small">© ${new Date().getFullYear()} Flavory, Dhaka.</p>
@@ -59,7 +61,7 @@ function renderCartBar() {
     const order = document.getElementById('hdr-order')
     if (order) {
       order.textContent = count ? `Cart (${count})` : 'Order'
-      order.href = count ? '/cart' : '/menu'
+      order.href = count ? '/cart/' : '/menu/'
     }
     const show = count > 0 && !onCart
     document.body.classList.toggle('has-bar', show)
@@ -68,7 +70,7 @@ function renderCartBar() {
       bar = document.createElement('div')
       bar.id = 'bar'
       bar.className = 'bar'
-      bar.innerHTML = '<a href="/cart" class="btn block"></a>'
+      bar.innerHTML = '<a href="/cart/" class="btn block"></a>'
       document.body.append(bar)
     }
     bar.firstChild.textContent = `View cart · ${tk(cart.total())}`
@@ -91,14 +93,39 @@ export const safeUrl = u => /^https?:\/\//i.test(u ?? '') ? u : ''
 
 export const setText = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text }
 
-// Fetches the page's data (cached at the CDN) and fills the shared chrome.
+const WITH_MENU = new Set(['home', 'menu', 'checkout'])
+const WITH_REVIEWS = new Set(['home', 'reviews'])
+const SLUGS = new Set(['home', 'our-story', 'delivery', 'contact', 'privacy', 'terms', 'refund'])
+
+// Public data straight from Supabase: row-level security only lets this key read published content.
+const rest = async path => {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } })
+  if (!res.ok) throw new Error(`content ${res.status}`)
+  return res.json()
+}
+
+export async function loadContent(page) {
+  const [settings, pageRows, categories, items, reviews] = await Promise.all([
+    rest('settings?select=key,value'),
+    SLUGS.has(page) ? rest(`pages?select=content&slug=eq.${page}`) : null,
+    WITH_MENU.has(page) ? rest('categories?select=id,name,sort_order&order=sort_order') : null,
+    WITH_MENU.has(page) ? rest('menu_items?select=*,item_options(id,label,price,sort_order)&order=sort_order') : null,
+    WITH_REVIEWS.has(page) ? rest('reviews?select=id,name,rating,body,created_at&order=created_at.desc&limit=50') : null,
+  ])
+  items?.forEach(i => i.item_options.sort((a, b) => a.sort_order - b.sort_order))
+  return {
+    settings: Object.fromEntries(settings.map(r => [r.key, r.value])),
+    page: pageRows?.[0]?.content ?? null,
+    categories, items, reviews,
+  }
+}
+
+// Draws the shared chrome, then fetches the page's data.
 export async function start(page) {
   renderHeader()
   renderCartBar()
   reveal()
-  const res = await fetch(`/api/content?page=${page}`)
-  if (!res.ok) throw new Error('content failed')
-  const data = await res.json()
+  const data = await loadContent(page)
   renderFooter(data.settings)
   return data
 }

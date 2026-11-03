@@ -1,6 +1,7 @@
 // The three cart steps. Each is a real page, so the back button just works.
 import { cart } from './cart.js'
 import { esc, normalizePhone, slotLabel, tk } from './format.js'
+import { TURNSTILE_SITE_KEY } from './config.js'
 import { isSoldOut, start } from './site.js'
 
 const app = document.getElementById('app')
@@ -34,7 +35,7 @@ function emptyCart() {
   app.innerHTML = `<div class="stack center">
     <h1>Your cart is empty</h1>
     <p class="muted">Something crispy is one tap away.</p>
-    <a href="/menu" class="btn">See the menu</a>
+    <a href="/menu/" class="btn">See the menu</a>
   </div>`
 }
 
@@ -59,8 +60,8 @@ async function cartStep() {
           <button class="remove" data-act="remove">Remove</button>
         </div>`).join('')}</div>
       ${quote ? totals(quote) : ''}
-      <a href="/cart/review" class="btn block">Continue</a>
-      <a href="/menu" class="btn ghost block">Add more</a>
+      <a href="/cart/review/" class="btn block">Continue</a>
+      <a href="/menu/" class="btn ghost block">Add more</a>
     </div>`
   }
   app.addEventListener('click', async e => {
@@ -78,7 +79,7 @@ async function cartStep() {
 
 // STEP 2: "Is that everything?"
 async function reviewStep() {
-  if (!cart.lines().length) return location.replace('/cart')
+  if (!cart.lines().length) return location.replace('/cart/')
   let quote = null
   const suggestions = data.items.filter(i => i.suggest && !isSoldOut(i))
   const paint = () => {
@@ -98,8 +99,8 @@ async function reviewStep() {
         return `<div class="suggest"><span>Add ${esc(i.name)}${o.label ? ` (${esc(o.label)})` : ''}? <span class="muted">${tk(o.price)}</span></span>
           <button class="btn ghost" data-add="${esc(i.id)}">Add</button></div>`
       }).join('')}
-      <a href="/cart/details" class="btn block">Yes, that's all — continue</a>
-      <a href="/cart" class="btn ghost block">Change my order</a>
+      <a href="/cart/details/" class="btn block">Yes, that's all — continue</a>
+      <a href="/cart/" class="btn ghost block">Change my order</a>
     </div>`
   }
   app.addEventListener('click', async e => {
@@ -119,7 +120,7 @@ async function reviewStep() {
 
 // STEP 3: details
 function detailsStep() {
-  if (!cart.lines().length) return location.replace('/cart')
+  if (!cart.lines().length) return location.replace('/cart/')
   const showCoupon = marketing.coupons || marketing.bounce.enabled || marketing.referral.enabled
   const areaNames = delivery.areas.map(a => a.name).join(' and ')
 
@@ -155,13 +156,13 @@ function detailsStep() {
       <div class="row"><input class="input" id="code" maxlength="30"><button type="button" class="btn ghost" id="apply">Apply</button></div>
       <span id="code-msg"></span></div>` : ''}
     <div id="summary"></div>
-    ${data.turnstile_key ? `<div class="cf-turnstile" data-sitekey="${esc(data.turnstile_key)}" data-theme="dark"></div>` : ''}
+    ${TURNSTILE_SITE_KEY ? `<div class="cf-turnstile" data-sitekey="${esc(TURNSTILE_SITE_KEY)}" data-theme="dark"></div>` : ''}
     <p class="notice err" id="error" role="alert" hidden></p>
     <button class="btn block" id="submit" disabled>Place order</button>
-    <p class="muted center">By ordering you agree to our <a class="link" href="/terms">terms</a>.</p>
+    <p class="muted center">By ordering you agree to our <a class="link" href="/terms/">terms</a>.</p>
   </form>`
 
-  if (data.turnstile_key) {
+  if (TURNSTILE_SITE_KEY) {
     const s = document.createElement('script')
     s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js'
     s.defer = true
@@ -187,7 +188,11 @@ function detailsStep() {
   async function refresh() {
     const me = ++run
     const q = await getQuote({ area: area(), coupon, phone: normalizePhone($('phone').value) ?? '' })
-    if (me !== run || !q) return
+    if (me !== run) return
+    if (!q) {
+      $('summary').innerHTML = '<p class="notice err">We could not work out your total. Please refresh the page, or call us to order.</p>'
+      return
+    }
     quote = q
     if (!q.open_now && !q.slots.length) {
       app.innerHTML = `<div class="stack center"><h1>The kitchen is closed</h1>
