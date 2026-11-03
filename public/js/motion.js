@@ -45,7 +45,8 @@ function boot() {
   })
 
   if (fine) cursor()
-  document.fonts.ready.then(() => ST.refresh())
+  document.fonts.ready.then(() => { ST.sort(); ST.refresh() })
+  addEventListener('load', () => { ST.sort(); ST.refresh() })
 }
 
 function cursor() {
@@ -56,6 +57,8 @@ function cursor() {
   const x = gsap.quickTo(c, 'x', { duration: 0.35, ease: 'power3' })
   const y = gsap.quickTo(c, 'y', { duration: 0.35, ease: 'power3' })
   addEventListener('pointermove', e => { x(e.clientX); y(e.clientY) })
+  document.documentElement.addEventListener('mouseleave', () => { c.style.opacity = 0 })
+  document.documentElement.addEventListener('mouseenter', () => { c.style.opacity = 1 })
   // Over controls the dot steps aside so the control's own hover can play; over big media it becomes a label.
   document.addEventListener('pointerover', e => {
     const labelled = e.target.closest('[data-cursor]')
@@ -111,21 +114,6 @@ function magnetic(b) {
     qy((e.clientY - r.top - r.height / 2) * 0.22)
   })
   b.addEventListener('pointerleave', () => gsap.to(b, { x: 0, y: 0, duration: 0.8, ease: 'elastic.out(1, 0.4)' }))
-}
-
-// Pointer tilt with a gold sheen that follows the light.
-function tilt(card) {
-  const rx = gsap.quickTo(card, 'rotationX', { duration: 0.6, ease: 'power3' })
-  const ry = gsap.quickTo(card, 'rotationY', { duration: 0.6, ease: 'power3' })
-  card.addEventListener('pointermove', e => {
-    const r = card.getBoundingClientRect()
-    const px = (e.clientX - r.left) / r.width, py = (e.clientY - r.top) / r.height
-    ry((px - 0.5) * 9)
-    rx((0.5 - py) * 7)
-    card.style.setProperty('--mx', `${px * 100}%`)
-    card.style.setProperty('--my', `${py * 100}%`)
-  })
-  card.addEventListener('pointerleave', () => { rx(0); ry(0) })
 }
 
 const onEnter = (trigger, start = 'top 88%') => ({ trigger, start, once: true })
@@ -190,11 +178,12 @@ export function reveal() {
         gsap.from(batch.map(c => c.querySelector('.card-plate')), { scale: 1.25, duration: 1.6, stagger: 0.1 })
       },
     })
-    if (fine) cards.forEach(tilt)
   }
 
   if (fine) fresh('[data-magnetic]').forEach(magnetic)
   root.classList.add('motion-ready')
+  // Triggers are created out of page order (some wait for data); sorting first keeps every pin's start correct.
+  ST.sort()
   ST.refresh()
 }
 

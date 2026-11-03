@@ -160,37 +160,41 @@ export function hero() {
 
   const capFirst = sec.querySelector('.cap-first')
   const h1 = Split.create(capFirst.querySelector('h1'), { type: 'lines', mask: 'lines' })
-  gsap.set(capFirst, { autoAlpha: 0 })
+  // Hidden by a class, not by GSAP: ScrollTrigger resets animated elements to their creation state on every re-measure.
+  sec.classList.add('pre-intro')
   const intro = () => gsap.timeline()
-    .set(capFirst, { autoAlpha: 1 })
+    .call(() => sec.classList.remove('pre-intro'))
     .from(h1.lines, { yPercent: 115, duration: 1.3, stagger: 0.12 })
     .from(capFirst.querySelectorAll('.kicker, .hero-sub, .hero-cta'), { y: 26, autoAlpha: 0, duration: 1, stagger: 0.08 }, 0.25)
     .from('.ghost-crispy', { yPercent: 40, autoAlpha: 0, duration: 1.8 }, 0)
     .from('.scroll-cue, .hero-progress', { autoAlpha: 0, duration: 1 }, 0.8)
 
-  Promise.all([fry, ready]).then(([seq]) => {
-    gsap.matchMedia().add({ d: '(min-width: 900px)', m: '(max-width: 899px)' }, c => {
-      const tl = gsap.timeline({
-        defaults: { ease: 'none' },
-        scrollTrigger: { trigger: sec, start: 'top top', end: c.conditions.d ? '+=320%' : '+=210%', scrub: c.conditions.d ? 0.7 : 0.4, pin: sec.querySelector('.seq-stage'), anticipatePin: 1 },
-      })
-      frames(tl, seq, 0, 0.86)
-      tl.to(capFirst, { autoAlpha: 0, y: -50, duration: 0.06 }, 0.2)
-      captions(tl, sec.querySelectorAll('.cap:not(.cap-first)'))
-      tl.to('.ghost-crispy', { yPercent: -60, scale: 1.25, autoAlpha: 0, duration: 0.5 }, 0)
-      tl.to('.scroll-cue', { autoAlpha: 0, duration: 0.05 }, 0.02)
-      tl.to(goldCanvas, { opacity: 1, duration: 0.08 }, 0.8)
-      sec.querySelectorAll('.hero-progress b').forEach((b, i) => tl.to(b, { scaleX: 1, duration: 0.25 }, i * 0.25))
-      tl.to({}, { duration: 0.001 }, 1)
-      return () => tl.kill()
+  // The pinned timeline exists from the start so every section below measures the right scroll length;
+  // the video frames join it whenever they arrive (also after a breakpoint change rebuilds it).
+  let fryer = null, gold = null, tl = null
+  const attach = () => {
+    if (!tl) return
+    if (fryer && !tl.data?.fry) { frames(tl, fryer, 0, 0.86); tl.data = { ...tl.data, fry: true } }
+    if (gold && !tl.data?.gold) { tl.to(gold.state, { frame: gold.count - 1, ease: 'none', duration: 0.2, onUpdate: () => gold.render() }, 0.8); tl.data = { ...tl.data, gold: true } }
+  }
+  gsap.matchMedia().add({ d: '(min-width: 900px)', m: '(max-width: 899px)' }, c => {
+    tl = gsap.timeline({
+      defaults: { ease: 'none' },
+      scrollTrigger: { trigger: sec, start: 'top top', end: c.conditions.d ? '+=320%' : '+=210%', scrub: c.conditions.d ? 0.7 : 0.4, pin: sec.querySelector('.seq-stage') },
     })
-    // The golden finish loads once the fryer is ready, then joins the same scroll.
-    createSequence(goldCanvas, 'golden').then(gold => {
-      const st = ST.getAll().find(t => t.pin === sec.querySelector('.seq-stage'))
-      if (!st) return
-      st.animation.to(gold.state, { frame: gold.count - 1, ease: 'none', duration: 0.2, onUpdate: () => gold.render() }, 0.8)
-    })
+    // Explicit start values: the timeline is built before the intro reveals the headline.
+    tl.fromTo(capFirst, { autoAlpha: 1, y: 0 }, { autoAlpha: 0, y: -50, duration: 0.06, immediateRender: false }, 0.2)
+    captions(tl, sec.querySelectorAll('.cap:not(.cap-first)'))
+    tl.fromTo('.ghost-crispy', { yPercent: 0, scale: 1, autoAlpha: 1 }, { yPercent: -40, scale: 1.18, autoAlpha: 0, duration: 0.5, immediateRender: false }, 0)
+    tl.fromTo('.scroll-cue', { autoAlpha: 1 }, { autoAlpha: 0, duration: 0.05, immediateRender: false }, 0.02)
+    tl.to(goldCanvas, { opacity: 1, duration: 0.08 }, 0.8)
+    sec.querySelectorAll('.hero-progress b').forEach((b, i) => tl.to(b, { scaleX: 1, duration: 0.25 }, i * 0.25))
+    tl.to({}, { duration: 0.001 }, 1)
+    attach()
+    return () => { tl.kill(); tl = null }
   })
+  fry.then(seq => { fryer = seq; attach() })
+  ready.then(() => createSequence(goldCanvas, 'golden').then(g => { gold = g; attach() }))
   return ready.then(() => ({ intro }))
 }
 
@@ -278,7 +282,7 @@ export function snap() {
     const tl = gsap.timeline({
       defaults: { ease: 'none' },
       scrollTrigger: {
-        trigger: sec, start: 'top top', end: d ? '+=240%' : '+=190%', scrub: 0.6, pin: sec.querySelector('.seq-stage'), anticipatePin: 1,
+        trigger: sec, start: 'top top', end: d ? '+=240%' : '+=190%', scrub: 0.6, pin: sec.querySelector('.seq-stage'),
         onUpdate: s => {
           const secs = s.progress * 3.6
           tc.textContent = `00:00:${pad(Math.floor(secs))}:${pad(Math.floor((secs % 1) * 60))}`
@@ -302,10 +306,12 @@ export function snap() {
       .fromTo(wave, { strokeDasharray: L, strokeDashoffset: L }, { strokeDashoffset: 0, duration: 0.7 }, 0.25)
       .to({}, { duration: 0.001 }, 1)
     st.tl = tl
+    if (st.seq) frames(tl, st.seq, 0.08, 0.86)
     return () => tl.kill()
   })
   whenNear(sec, () => createSequence(sec.querySelector('canvas'), 'snap').then(seq => {
     seq.firstPass.then(() => sec.querySelector('.snap-frame > img')?.remove())
+    st.seq = seq
     if (st.tl) frames(st.tl, seq, 0.08, 0.86)
   }))
 }
@@ -354,7 +360,6 @@ export function collection(items) {
       if (k === i) p.removeAttribute('data-cursor'); else p.dataset.cursor = 'OPEN'
     })
     count.textContent = `${pad(i + 1)} / ${pad(panels.length)} · ${list[i].name.toUpperCase()}`
-    setTimeout(() => ST?.refresh(), 950) // panel heights change on phones
   }
   panels.forEach((p, i) => { if (i) p.dataset.cursor = 'OPEN' })
   count.textContent = `01 / ${pad(panels.length)} · ${list[0].name.toUpperCase()}`
@@ -364,7 +369,11 @@ export function collection(items) {
   panels.forEach((p, i) => {
     p.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse' && desk()) { clearTimeout(intent); intent = setTimeout(() => open(i), 140) } })
     p.addEventListener('pointerleave', () => clearTimeout(intent))
-    p.addEventListener('click', e => { if (!e.target.closest('.cp-body')) open(i) })
+    p.addEventListener('click', e => {
+      if (e.target.closest('.cp-body')) return
+      if (desk()) open(i)
+      else box.scrollTo({ left: p.offsetLeft - (box.clientWidth - p.offsetWidth) / 2, behavior: reduce ? 'auto' : 'smooth' })
+    })
     p.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target === p) { e.preventDefault(); open(i) } })
     p.addEventListener('focus', () => { if (desk()) open(i) })
     p.addEventListener('change', e => { p.querySelector('.cp-price').textContent = tk(list[i].item_options[Number(e.target.value)].price) })
@@ -385,7 +394,33 @@ export function collection(items) {
       p.addEventListener('pointerleave', () => { qx(0); qy(0) })
     }
   })
-  if (live) gsap.from(panels, { yPercent: 18, autoAlpha: 0, clipPath: 'inset(100% 0% 0% 0%)', duration: 1.3, stagger: 0.08, ease: 'expo.out', clearProps: 'clipPath', scrollTrigger: { trigger: box, start: 'top 85%', once: true } })
+  // Phones and tablets: a swipe rail. The card nearest the centre opens; its neighbours dim and step back,
+  // and every photo slides a little against the swipe, like looking through a window.
+  const track = document.getElementById('col-track')
+  let raf = 0
+  const onRail = () => {
+    raf = 0
+    if (desk()) { panels.forEach(p => { p.style.transform = ''; p.style.removeProperty('--px') }); return }
+    const rc = box.getBoundingClientRect(), mid = rc.left + rc.width / 2
+    let best = 0, bestD = Infinity
+    panels.forEach((p, i) => {
+      const r = p.getBoundingClientRect()
+      const d = (r.left + r.width / 2 - mid) / r.width
+      if (Math.abs(d) < bestD) { bestD = Math.abs(d); best = i }
+      if (!reduce) {
+        p.style.setProperty('--px', `${(-d * 7).toFixed(2)}%`)
+        p.style.transform = `scale(${(1 - Math.min(Math.abs(d), 1) * 0.07).toFixed(3)})`
+      }
+    })
+    if (best !== at) open(best)
+    const max = box.scrollWidth - box.clientWidth
+    track.style.setProperty('--p', max > 0 ? (0.15 + 0.85 * box.scrollLeft / max).toFixed(3) : 1)
+  }
+  box.addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(onRail) }, { passive: true })
+  addEventListener('resize', () => { if (!raf) raf = requestAnimationFrame(onRail) })
+  onRail()
+
+  if (live) gsap.from(panels, { yPercent: 18, autoAlpha: 0, clipPath: 'inset(100% 0% 0% 0%)', duration: 1.3, stagger: 0.08, ease: 'expo.out', clearProps: 'clipPath,transform', onComplete: onRail, scrollTrigger: { trigger: box, start: 'top 85%', once: true } })
 }
 
 // ---------------------------------------------------------------------------
@@ -396,7 +431,7 @@ export function packed() {
   const stamp = sec.querySelector('.seal-stamp'), portal = sec.querySelector('.portal')
   const st = { tl: null }
   gsap.matchMedia().add({ d: '(min-width: 900px)', m: '(max-width: 899px)' }, c => {
-    const tl = gsap.timeline({ defaults: { ease: 'none' }, scrollTrigger: { trigger: sec, start: 'top top', end: c.conditions.d ? '+=260%' : '+=180%', scrub: 0.5, pin: sec.querySelector('.seq-stage'), anticipatePin: 1 } })
+    const tl = gsap.timeline({ defaults: { ease: 'none' }, scrollTrigger: { trigger: sec, start: 'top top', end: c.conditions.d ? '+=260%' : '+=180%', scrub: 0.5, pin: sec.querySelector('.seq-stage') } })
     captions(tl, sec.querySelectorAll('.cap:not(.cap-first)'))
     tl.to(sec.querySelector('.cap-first'), { autoAlpha: 0, y: -40, duration: 0.05 }, 0.33)
     tl.fromTo(stamp, { scale: 2.8, rotate: -40, autoAlpha: 0 }, { scale: 1, rotate: -8, autoAlpha: 1, duration: 0.06, ease: 'power4.in' }, 0.74)
@@ -405,9 +440,10 @@ export function packed() {
       .to(portal, { scale: () => Math.hypot(innerWidth, innerHeight) / 18, duration: 0.12, ease: 'power2.in' }, 0.89)
       .to({}, { duration: 0.001 }, 1)
     st.tl = tl
+    if (st.seq) frames(tl, st.seq, 0, 0.8)
     return () => tl.kill()
   })
-  whenNear(sec, () => createSequence(sec.querySelector('canvas'), 'packed').then(seq => { if (st.tl) frames(st.tl, seq, 0, 0.8) }))
+  whenNear(sec, () => createSequence(sec.querySelector('canvas'), 'packed').then(seq => { st.seq = seq; if (st.tl) frames(st.tl, seq, 0, 0.8) }))
 }
 
 // ---------------------------------------------------------------------------
