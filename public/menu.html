@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Menu | Flavory</title>
+<meta name="description" content="The Flavory menu: crispy chicken nuggets, strips and burgers — delivery in Dhanmondi & Mohammadpur, Dhaka.">
+<meta property="og:title" content="The Flavory menu">
+<meta property="og:description" content="Crispy chicken nuggets, strips and burgers — delivery in Dhanmondi & Mohammadpur, Dhaka.">
+<meta property="og:image" content="/brand/chef-poster.webp">
+<meta name="theme-color" content="#1E0C29">
+<link rel="icon" href="/favicon.png">
+<link rel="preload" href="/fonts/playfair.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/montserrat.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/api/content?page=menu" as="fetch" crossorigin>
+<link rel="stylesheet" href="/css/site.css">
+<script type="module" src="/js/menu.js"></script>
+</head>
+<body>
+<header class="hdr" id="hdr"></header>
+<main>
+  <div class="wrap page-pad">
+    <h1>Our Menu</h1>
+    <p class="second mt8">Fried fresh when you order.</p>
+    <p class="notice mt16" id="closed" hidden>The kitchen is closed right now. You can still look around.</p>
+  </div>
+  <nav class="tabs" aria-label="Menu categories"><div class="wrap tabs-in" id="tabs"></div></nav>
+  <div class="wrap page-pad" id="menu"><p class="muted">Loading the menu…</p></div>
+</main>
+<div id="ftr"></div>
+</body>
+</html>
