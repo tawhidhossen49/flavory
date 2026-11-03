@@ -22,7 +22,7 @@ function page(r, token, site, business) {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Flavory order ${no}</title>
 <meta name="robots" content="noindex, nofollow">
-<meta name="theme-color" content="#1E0C29">
+<meta name="theme-color" content="#0C0811">
 <meta property="og:title" content="Flavory order ${no}">
 <meta property="og:description" content="Total ${tk(r.total)}">
 <meta property="og:type" content="website">

@@ -1,0 +1,30 @@
+{
+  "name": "fryer",
+  "frameCount": 120,
+  "desktop": {
+    "dir": "desktop",
+    "ext": "webp"
+  },
+  "mobile": {
+    "dir": "mobile",
+    "ext": "webp"
+  },
+  "poster": "poster.webp",
+  "edgeColor": "#120d09",
+  "edgeColorEnd": "#0b0805",
+  "source": {
+    "file": "fryer.mp4",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30.0,
+    "trim": [
+      0.0,
+      8.03
+    ]
+  },
+  "possibleCuts": [],
+  "sizeMB": {
+    "desktop": 3.3,
+    "mobile": 2.2
+  }
+}

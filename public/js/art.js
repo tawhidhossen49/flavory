@@ -44,3 +44,17 @@ export function artSvg(name) {
     <g class="steam"><path d="M98 46 c-7 -8 7 -14 0 -24"/><path d="M120 40 c-7 -8 7 -14 0 -24"/><path d="M142 46 c-7 -8 7 -14 0 -24"/></g>
   </svg>`
 }
+
+// shortcut: stand-in photos chosen by item name until the owner uploads real ones in admin; any uploaded photo wins.
+const DEMO = { nuggets: 'nuggets', strips: 'strips', burger: 'burger' }
+export function demoPhoto(name) {
+  const k = DEMO[kindOf(name)]
+  if (!k) return null
+  const file = k === 'burger' && /spicy/i.test(name) ? 'spicy-burger' : k
+  return { photo: `/demo/${file}.webp`, cut: `/demo/${file}-cut.webp` }
+}
+
+// The picture to use for an item: its own photo first, then a stand-in.
+export const photoOf = item => item.photos?.[0] ?? demoPhoto(item.name)?.photo ?? null
+// A transparent cut-out if one exists (file name contains "-cut"), for the floating carousel.
+export const cutoutOf = item => item.photos?.find(u => /-cut\./.test(u)) ?? (item.photos?.[0] ? null : demoPhoto(item.name)?.cut ?? null)

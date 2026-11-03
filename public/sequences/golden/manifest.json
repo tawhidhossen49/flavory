@@ -1,0 +1,30 @@
+{
+  "name": "golden",
+  "frameCount": 40,
+  "desktop": {
+    "dir": "desktop",
+    "ext": "webp"
+  },
+  "mobile": {
+    "dir": "mobile",
+    "ext": "webp"
+  },
+  "poster": "poster.webp",
+  "edgeColor": "#3c1f0a",
+  "edgeColorEnd": "#3b2009",
+  "source": {
+    "file": "golden.mp4",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30.0,
+    "trim": [
+      0.0,
+      8.0
+    ]
+  },
+  "possibleCuts": [],
+  "sizeMB": {
+    "desktop": 1.4,
+    "mobile": 0.7
+  }
+}

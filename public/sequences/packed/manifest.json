@@ -1,0 +1,30 @@
+{
+  "name": "packed",
+  "frameCount": 90,
+  "desktop": {
+    "dir": "desktop",
+    "ext": "webp"
+  },
+  "mobile": {
+    "dir": "mobile",
+    "ext": "webp"
+  },
+  "poster": "poster.webp",
+  "edgeColor": "#2d251b",
+  "edgeColorEnd": "#2b241d",
+  "source": {
+    "file": "packed.mp4",
+    "width": 1920,
+    "height": 1012,
+    "fps": 30.0,
+    "trim": [
+      0.0,
+      7.8
+    ]
+  },
+  "possibleCuts": [],
+  "sizeMB": {
+    "desktop": 2.2,
+    "mobile": 1.5
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "snap",
+  "frameCount": 72,
+  "desktop": {
+    "dir": "desktop",
+    "ext": "webp"
+  },
+  "mobile": null,
+  "poster": "poster.webp",
+  "edgeColor": "#2a1712",
+  "edgeColorEnd": "#26110c",
+  "source": {
+    "file": "snap-9x16.mp4",
+    "width": 720,
+    "height": 1280,
+    "fps": 30.0,
+    "trim": [
+      0.0,
+      3.3
+    ]
+  },
+  "possibleCuts": [],
+  "sizeMB": {
+    "desktop": 1.5,
+    "mobile": 0
+  }
+}

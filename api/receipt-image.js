@@ -5,7 +5,7 @@ import { rpc } from '../lib/db.js'
 import { PAYMENT_LABEL, dateTime, orderNo, slotLabel, tk } from '../public/js/format.js'
 
 const asset = p => readFile(new URL(`../assets/${p}`, import.meta.url))
-const PLUM = '#1E0C29', GOLD = '#C9A45C', GOLD_INK = '#7A5A1E', IVORY = '#FBF4E8', KRAFT = '#B58A5C'
+const PLUM = '#0C0811', GOLD = '#D9BC82', GOLD_INK = '#7A5A1E', IVORY = '#F5EEE3', KRAFT = '#B58A5C'
 
 // satori takes a plain element tree; every multi-child box must be display:flex.
 const h = (type, style, ...children) => ({ type, props: { style: { display: 'flex', ...style }, children: children.flat().filter(Boolean) } })

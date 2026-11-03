@@ -19,6 +19,7 @@ function boot() {
   booted = true
   if (!live) { root.classList.add('motion-ready', 'hero-in'); return }
   gsap.registerPlugin(ST, Split)
+  ST.config({ ignoreMobileResize: true })
   gsap.defaults({ ease: 'expo.out', duration: 1 })
 
   // Smooth wheel scrolling on desktop only; phones keep their native scroll.
@@ -168,77 +169,4 @@ export function flyToCart(from) {
     .fromTo(target, { scale: 1 }, { scale: 1.12, duration: 0.18, yoyo: true, repeat: 1, ease: 'power2.out' }, 0.72)
 }
 
-// P1 × P5: a gold ring draws round the script wordmark, then the panel lifts away.
-export function preloader() {
-  const el = document.querySelector('.preloader')
-  if (!el) return Promise.resolve()
-  if (!live || root.classList.contains('no-preload')) { el.remove(); return Promise.resolve() }
-  lenis?.stop()
-  const ring = el.querySelector('.pl-ring')
-  const L = ring.getTotalLength()
-  const { chars } = Split.create(el.querySelector('.pl-word'), { type: 'chars' })
-  return new Promise(resolve => gsap.timeline({ onComplete: () => { el.remove(); lenis?.start(); resolve() } })
-    .fromTo(ring, { strokeDasharray: L, strokeDashoffset: L }, { strokeDashoffset: 0, duration: 1.3, ease: 'power2.inOut' }, 0)
-    .from(chars, { autoAlpha: 0, filter: 'blur(8px)', y: 12, duration: 0.7, stagger: 0.06, ease: 'power3.out' }, 0.15)
-    .from(el.querySelector('.pl-word'), { letterSpacing: '0.35em', duration: 1.2 }, 0.15)
-    .to(el.querySelector('.pl-inner'), { scale: 0.92, autoAlpha: 0, duration: 0.45, ease: 'power2.in' }, '+=0.15')
-    .to(el, { yPercent: -100, duration: 0.85, ease: 'expo.inOut' }, '-=0.15'))
-}
-
-// H9: giant word behind (and partly in front of) the chef, then scroll parallax.
-export function heroIntro() {
-  const hero = document.querySelector('.hero')
-  if (!hero) return
-  if (!live) { root.classList.add('hero-in'); return }
-  const words = [...hero.querySelectorAll('.hero-word')].map(w => Split.create(w, { type: 'chars' }).chars)
-  const h1 = Split.create(hero.querySelector('h1'), { type: 'lines', mask: 'lines' })
-  const tl = gsap.timeline()
-  words.forEach(chars => tl.from(chars, { yPercent: 110, duration: 1.4, stagger: 0.06 }, 0))
-  tl.from('.hero-chef', { yPercent: 14, autoAlpha: 0, duration: 1.6 }, 0.1)
-    .from('.hero-ring', { scale: 0.6, rotation: -60, autoAlpha: 0, duration: 1.8 }, 0)
-    .from(h1.lines, { yPercent: 115, duration: 1.2, stagger: 0.1 }, 0.35)
-    .from('.hero [data-hero]', { y: 24, autoAlpha: 0, duration: 1, stagger: 0.08 }, 0.6)
-  root.classList.add('hero-in')
-
-  gsap.matchMedia().add({ desk: '(min-width: 900px)', phone: '(max-width: 899px)' }, ctx => {
-    const k = ctx.conditions.desk ? 1 : 0.5
-    gsap.timeline({ scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true } })
-      .to('.hero-word', { yPercent: -28 * k, ease: 'none' }, 0)
-      .to('.hero-chef', { yPercent: 6 * k, scale: 1 - 0.04 * k, ease: 'none' }, 0)
-      .to('.hero-ring', { rotation: 50, ease: 'none' }, 0)
-      .to('.hero-copy', { yPercent: -18 * k, autoAlpha: 0.2, ease: 'none' }, 0)
-  })
-}
-
-// Signature: the kraft box steams open, seals, turns and arrives, scrubbed through four steps.
-export function kraftBox() {
-  const sec = document.querySelector('.box-sec')
-  if (!sec) return
-  const steps = [...sec.querySelectorAll('.box-steps li')]
-  const texts = [...sec.querySelectorAll('.box-text')]
-  const show = i => {
-    steps.forEach((s, k) => s.classList.toggle('is-on', k === i))
-    texts.forEach((t, k) => t.classList.toggle('is-on', k === i))
-  }
-  show(0)
-  if (!live) { sec.classList.add('is-static'); return }
-
-  gsap.matchMedia().add({ desk: '(min-width: 900px)', phone: '(max-width: 899px)' }, ctx => {
-    const tl = gsap.timeline({
-      defaults: { ease: 'none' },
-      scrollTrigger: {
-        trigger: sec, start: 'top top', end: ctx.conditions.desk ? '+=260%' : '+=170%',
-        scrub: 0.7, pin: sec.querySelector('.box-pin'), anticipatePin: 1,
-        onUpdate: s => show(Math.min(3, Math.floor(s.progress * 4))),
-      },
-    })
-    tl.fromTo('.box3d', { rotationY: -38, rotationX: -22 }, { rotationY: 18, rotationX: -16, duration: 1 }, 0)
-      .fromTo('.box-lid', { rotationX: 114 }, { rotationX: 114, duration: 1 }, 0)
-      .to('.box3d', { rotationY: -8, duration: 1 }, 1)
-      .to('.box-lid', { rotationX: 0, duration: 0.8, ease: 'power2.in' }, 2)
-      .to('.box-glow, .box-light', { autoAlpha: 0, duration: 0.6 }, 2.2)
-      .to('.box-steam', { autoAlpha: 0, duration: 0.5 }, 2.1)
-      .to('.box3d', { rotationY: 0, rotationX: -10, scale: 1.12, y: -14, duration: 1 }, 3)
-      .fromTo('.box-progress i', { scaleY: 0 }, { scaleY: 1, duration: 4 }, 0)
-  })
-}
+export const motion = { gsap, ST, Split, live, get lenis() { return lenis } }

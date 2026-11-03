@@ -1,5 +1,5 @@
 // The menu card on its own, so the admin preview can use it without loading the public site chrome.
-import { artSvg } from './art.js'
+import { artSvg, photoOf } from './art.js'
 import { dhakaToday, esc, tk } from './format.js'
 
 export function photo(url, alt, sizes) {
@@ -20,10 +20,11 @@ const PLUS = '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"
 export function cardHtml(item) {
   const soldOut = isSoldOut(item)
   const opts = item.item_options
+  const pic = photoOf(item)
   return `
-  <article class="card${soldOut ? ' out' : ''}${item.photos[0] ? ' has-photo' : ''}" data-item="${esc(item.id)}">
+  <article class="card${soldOut ? ' out' : ''}${pic ? ' has-photo' : ''}" data-item="${esc(item.id)}">
     <div class="card-visual">
-      <div class="card-plate">${item.photos[0] ? photo(item.photos[0], item.name, '(min-width: 900px) 360px, (min-width: 640px) 50vw, 100vw') : artSvg(item.name)}</div>
+      <div class="card-plate">${pic ? photo(pic, item.name, '(min-width: 900px) 360px, (min-width: 640px) 50vw, 100vw') : artSvg(item.name)}</div>
       ${item.badge ? `<span class="badge">${esc(item.badge)}</span>` : ''}
     </div>
     <div class="card-body">

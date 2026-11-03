@@ -9,3 +9,9 @@ next-env.d.ts
 .vercel/
 test-results/
 tmp/
+
+# design references and stand-in photos: never published
+*.zip
+assets/food images/
+raw-video/
+public/sequences/*/_qa/
