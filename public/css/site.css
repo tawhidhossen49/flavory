@@ -158,7 +158,7 @@ body::after { content: ""; position: fixed; inset: 0; z-index: 90; pointer-event
 .metal { background: var(--metal); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: sheen 6s linear infinite; }
 
 .hero-seq { margin-top: calc(var(--header) * -1); }
-.hero-seq .seq-scrim { background: linear-gradient(180deg, rgb(12 8 17 / .55) 0%, transparent 22%, transparent 45%, rgb(12 8 17 / .92) 88%); }
+.hero-seq .seq-scrim { background: linear-gradient(180deg, rgb(12 8 17 / .6) 0%, transparent 16%, rgb(12 8 17 / .45) 34%, rgb(12 8 17 / .9) 56%, rgb(12 8 17 / .96) 100%); }
 .hero-seq h1 { font-size: clamp(2.6rem, 11.5vw, 6.4rem); line-height: 1.02; max-width: 10ch; }
 .hero-seq h1 em { display: block; }
 .hero-sub { margin-top: 14px; max-width: 34ch; color: var(--ivory); opacity: .85; }
@@ -287,7 +287,7 @@ body::after { content: ""; position: fixed; inset: 0; z-index: 90; pointer-event
 .col-add { min-width: 230px; }
 
 /* PACKED: the box closes, the gold seal stamps on, then we fly through it */
-.packed .seq-scrim { background: radial-gradient(ellipse 70% 60% at 50% 50%, transparent 40%, rgb(12 8 17 / .85) 100%); }
+.packed .seq-scrim { background: linear-gradient(180deg, rgb(12 8 17 / .85) 0%, rgb(12 8 17 / .3) 32%, transparent 50%), radial-gradient(ellipse 70% 60% at 50% 55%, transparent 40%, rgb(12 8 17 / .85) 100%); }
 .seal-stamp { position: absolute; z-index: 3; left: 50%; top: 52%; width: var(--s); aspect-ratio: 1; margin: calc(var(--s) / -2) 0 0 calc(var(--s) / -2); border-radius: 50%; opacity: 0; box-shadow: 0 0 0 3px var(--gold), 0 18px 40px rgb(0 0 0 / .55); background: url(/brand/logo.webp) center / cover; --s: clamp(120px, 32vw, 210px); }
 .portal { position: absolute; z-index: 4; left: 50%; top: 52%; width: 20px; height: 20px; margin: -10px 0 0 -10px; border-radius: 50%; background: var(--ivory); transform: scale(0); }
 .packed .cap { text-align: center; justify-self: center; align-self: start; padding: calc(var(--header) + 5svh) var(--gutter) 0; }
@@ -494,6 +494,7 @@ fieldset.field { border: 0; margin: 0; padding: 0; }
   .grid { grid-template-columns: repeat(3, 1fr); gap: 26px; }
 
   .cap { padding-bottom: 12svh; padding-left: calc(var(--gutter) + 2vw); }
+  .hero-seq .seq-scrim { background: linear-gradient(90deg, rgb(12 8 17 / .82) 0%, rgb(12 8 17 / .35) 45%, transparent 70%), linear-gradient(180deg, rgb(12 8 17 / .5), transparent 18%, transparent 70%, rgb(12 8 17 / .7)); }
   .ghost-crispy { font-size: 24vw; top: 12svh; }
   .hero-progress { left: auto; width: 260px; right: calc(var(--gutter) + 60px); }
   .craft-grid { grid-template-columns: 1fr 1.05fr; gap: 6vw; align-items: start; }
