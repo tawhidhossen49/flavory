@@ -13,16 +13,22 @@
 <link rel="preload" href="/fonts/playfair.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/montserrat.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/css/site.css">
+<script src="/js/boot.js"></script>
+<script src="/vendor/gsap.min.js" defer></script>
+<script src="/vendor/ScrollTrigger.min.js" defer></script>
+<script src="/vendor/SplitText.min.js" defer></script>
+<script src="/vendor/lenis.min.js" defer></script>
 <script type="module" src="/js/menu.js"></script>
 </head>
 <body>
 <header class="hdr" id="hdr"></header>
 <main>
-  <div class="wrap page-pad">
-    <h1>Our Menu</h1>
-    <p class="second mt8">Fried fresh when you order.</p>
+  <header class="wrap page-head">
+    <p class="ghost-word" aria-hidden="true">Menu</p>
+    <p class="kicker" data-reveal>Fried fresh when you order</p>
+    <h1 class="mt16" data-t1>Our <em>menu</em></h1>
     <p class="notice mt16" id="closed" hidden>The kitchen is closed right now. You can still look around.</p>
-  </div>
+  </header>
   <nav class="tabs" aria-label="Menu categories"><div class="wrap tabs-in" id="tabs"></div></nav>
   <div class="wrap page-pad" id="menu"><p class="muted">Loading the menu…</p></div>
 </main>

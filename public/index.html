@@ -13,7 +13,8 @@
 <link rel="icon" href="/favicon.png">
 <link rel="preload" href="/fonts/playfair.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/montserrat.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/brand/chef.webp" as="image" fetchpriority="high">
+<link rel="preload" href="/fonts/great-vibes.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/brand/chef-cut.webp" as="image" fetchpriority="high">
 <link rel="stylesheet" href="/css/site.css">
 <script type="application/ld+json">
 {
@@ -25,104 +26,177 @@
   "address": { "@type": "PostalAddress", "addressLocality": "Lalmatia, Dhaka", "addressCountry": "BD" },
   "areaServed": ["Dhanmondi", "Mohammadpur"],
   "openingHours": "Mo-Su 12:00-22:00",
-  "hasMenu": "/menu"
+  "hasMenu": "/menu/"
 }
 </script>
+<script src="/js/boot.js"></script>
+<script src="/vendor/gsap.min.js" defer></script>
+<script src="/vendor/ScrollTrigger.min.js" defer></script>
+<script src="/vendor/SplitText.min.js" defer></script>
+<script src="/vendor/lenis.min.js" defer></script>
 <script type="module" src="/js/home.js"></script>
 </head>
 <body>
+<div class="preloader" aria-hidden="true">
+  <div class="pl-inner">
+    <svg class="pl-svg" viewBox="0 0 300 300"><circle class="pl-ring" cx="150" cy="150" r="140" transform="rotate(-90 150 150)"/></svg>
+    <p class="pl-word">Flavory</p>
+  </div>
+</div>
 <header class="hdr" id="hdr"></header>
 <main>
-  <section class="hero" id="hero">
-    <div class="wrap hero-in">
-      <div class="stack">
-        <p class="script lg">Flavory</p>
-        <h1 id="hero-title"><span><span>Fried fresh.</span></span><span><span>Made properly.</span></span></h1>
-        <p class="second hero-sub" id="hero-sub">Real chicken, a clean kitchen, and every piece fried when you order.</p>
-        <p class="hero-cta"><a href="/menu/" class="btn">Order now</a></p>
-      </div>
-      <div class="arch" id="arch">
-        <div class="arch-in"><img src="/brand/chef.webp" alt="Chef Shaheen Islam in her chef's whites" width="514" height="770" fetchpriority="high"></div>
-        <span class="arch-cap">Chef Shaheen Islam</span>
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-glow" aria-hidden="true"></div>
+    <div class="hero-stage">
+      <div class="hero-ring" aria-hidden="true"></div>
+      <p class="hero-word" aria-hidden="true">CRISPY</p>
+      <img class="hero-chef" src="/brand/chef-cut.webp" alt="Chef Shaheen Islam in her chef's whites, arms folded" width="546" height="1304" fetchpriority="high">
+    </div>
+    <div class="wrap hero-copy">
+      <p class="kicker" data-hero>Chef-made · Lalmatia, Dhaka</p>
+      <h1 id="hero-title" class="mt16">Fried fresh. <em>Made properly.</em></h1>
+      <p class="hero-sub" id="hero-sub" data-hero>Real chicken, a clean kitchen, and every piece fried when you order.</p>
+      <div class="hero-cta" data-hero>
+        <a class="btn pill" href="/menu/" data-magnetic>Order now <i aria-hidden="true">→</i></a>
+        <a class="link-arrow" href="/our-story/">Meet the chef</a>
       </div>
     </div>
+    <p class="hero-name" data-hero>Chef Shaheen Islam</p>
   </section>
 
-  <p class="promise second" id="promise">Real photo, real portion.</p>
+  <div class="marquee" data-marquee aria-label="Fried fresh to order. Real chicken. Measured recipes. A clean kitchen. Dhanmondi and Mohammadpur.">
+    <div class="marquee__track" aria-hidden="true">
+      <span>Fried fresh to order</span><span>Real chicken</span><span>Measured recipes</span><span>A clean kitchen</span><span>Dhanmondi &amp; Mohammadpur</span>
+      <span>Fried fresh to order</span><span>Real chicken</span><span>Measured recipes</span><span>A clean kitchen</span><span>Dhanmondi &amp; Mohammadpur</span>
+    </div>
+  </div>
 
-  <section class="section">
+  <section class="section manifesto">
     <div class="wrap">
-      <p class="kicker" id="best-kicker" data-reveal>From the kitchen</p>
-      <h2 class="mt8" data-reveal>Crisp, golden, made to order</h2>
-      <hr class="rule" data-reveal>
-      <div class="grid" id="featured"></div>
-      <p class="center mt24"><a href="/menu/" class="btn ghost">See the full menu</a></p>
+      <p class="kicker" data-reveal>01 — Our promise</p>
+      <p class="mt24" data-t2>Real chicken. Measured recipes. A clean kitchen. And every piece fried fresh, the moment you order.</p>
+      <p class="second mt24" id="promise" data-reveal>Real photo, real portion.</p>
     </div>
   </section>
 
   <section class="section alt">
     <div class="wrap">
-      <p class="kicker" data-reveal>How it works</p>
-      <h2 class="mt8" data-reveal>Three simple steps</h2>
-      <div class="steps" id="steps">
-        <div class="step" data-reveal><h3>Choose</h3><p class="muted">Pick your chicken from the menu and add it to your cart.</p></div>
-        <div class="step d1" data-reveal><h3>Confirm</h3><p class="muted">Add your details, get your receipt, and confirm on WhatsApp.</p></div>
-        <div class="step d2" data-reveal><h3>Enjoy</h3><p class="muted">We fry it fresh and bring it to your door.</p></div>
+      <div class="sec-head">
+        <p class="kicker" id="best-kicker" data-reveal>02 — From the kitchen</p>
+        <h2 data-t1>Crisp, golden, <em>made to order</em></h2>
+      </div>
+      <div class="grid" id="featured"></div>
+      <p class="mt40"><a href="/menu/" class="link-arrow">See the full menu</a></p>
+    </div>
+  </section>
+
+  <section class="box-sec" aria-labelledby="box-h">
+    <div class="box-pin">
+      <div class="wrap box-grid">
+        <div class="box-copy">
+          <p class="kicker">03 — From fryer to door</p>
+          <h2 class="box-h" id="box-h">How your order <em>travels</em></h2>
+          <div class="box-index">
+            <div class="box-progress" aria-hidden="true"><i></i></div>
+            <ol class="box-steps">
+              <li><b>01</b>Coated by hand</li>
+              <li><b>02</b>Fried to order</li>
+              <li><b>03</b>Packed hot</li>
+              <li><b>04</b>At your door</li>
+            </ol>
+          </div>
+          <div class="box-texts">
+            <p class="box-text"><strong>Coated by hand</strong>Real chicken, coated by hand to a measured recipe.</p>
+            <p class="box-text"><strong>Fried to order</strong>Nothing waits under a lamp. Your order goes into the fryer when you place it.</p>
+            <p class="box-text"><strong>Packed hot</strong>Straight into our kraft box, sealed with the gold Flavory sticker.</p>
+            <p class="box-text"><strong>At your door</strong><span id="box-areas">Delivered across Dhanmondi and Mohammadpur.</span> Not crispy when it arrives? We replace it free.</p>
+          </div>
+        </div>
+        <div class="box-stage" aria-hidden="true">
+          <div class="box-glow"></div>
+          <div class="box-floor"></div>
+          <svg class="box-steam" viewBox="0 0 160 140"><path d="M50 120 c-14 -18 14 -30 0 -50 s14 -30 0 -52"/><path d="M80 120 c-14 -18 14 -30 0 -50 s14 -30 0 -52"/><path d="M110 120 c-14 -18 14 -30 0 -50 s14 -30 0 -52"/></svg>
+          <div class="box-scene">
+            <div class="box3d">
+              <div class="face f-back"></div>
+              <div class="face f-left"></div>
+              <div class="face f-right"></div>
+              <div class="face f-bottom"></div>
+              <div class="box-light"></div>
+              <div class="face f-front"><span class="sticker"></span></div>
+              <div class="box-hinge"><div class="box-lid"><div class="face f-lid"><span class="sticker"></span></div></div></div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
 
-  <section class="section paper">
-    <div class="narrow center">
-      <p class="script md" data-reveal>Our story</p>
-      <h2 class="mt8" id="story-title" data-reveal>A chef's kitchen, not a fast-food line</h2>
-      <hr class="rule" data-reveal>
-      <p id="story-text" data-reveal>Chef Shaheen Islam trained at the Professional Cooking Academy, Dhaka, and cooks every order from our kitchen in Lalmatia.</p>
-      <p class="mt24" data-reveal><a href="/our-story/" class="btn ghost">Meet the chef</a></p>
+  <section class="chef-sec">
+    <div class="chef-card paper" data-expand>
+      <div class="wrap chef-grid">
+        <div class="chef-arch"><div class="arch-clip"><img src="/brand/chef-cut.webp" alt="Chef Shaheen Islam" width="546" height="1304" loading="lazy"></div></div>
+        <div class="chef-copy">
+          <p class="kicker" data-reveal>04 — Meet our chef</p>
+          <h2 class="mt16" id="story-title" data-t1>Chef Shaheen Islam</h2>
+          <p class="mt24" id="story-text" data-reveal>Chef Shaheen Islam trained at the Professional Cooking Academy, Dhaka, and cooks every order from our kitchen in Lalmatia.</p>
+          <ul class="creds">
+            <li data-reveal><b>PCA-trained</b><span>Professional Cooking Academy, Dhaka</span></li>
+            <li data-reveal data-delay=".1"><b>Certified</b><span>Fast Food &amp; Frozen Food</span></li>
+            <li data-reveal data-delay=".2"><b>Also certified</b><span>Biryani, Chinese &amp; Special Kabab</span></li>
+          </ul>
+          <p class="sign" data-reveal>Shaheen</p>
+          <p class="mt16" data-reveal><a href="/our-story/" class="btn ghost">Read her story</a></p>
+        </div>
+      </div>
     </div>
   </section>
 
   <section class="section guarantee">
     <div class="narrow">
       <div class="seal" data-seal>
-        <svg viewBox="0 0 200 200" role="img" aria-label="Flavory crispy guarantee seal">
-          <defs><path id="seal-arc" d="M100 100 m-68 0 a68 68 0 1 1 136 0 a68 68 0 1 1 -136 0"/></defs>
-          <path id="seal-edge" fill="#C9A45C"/>
-          <circle cx="100" cy="100" r="82" fill="none" stroke="#1E0C29" stroke-opacity=".45"/>
-          <circle cx="100" cy="100" r="54" fill="none" stroke="#1E0C29" stroke-opacity=".45"/>
-          <text><textPath href="#seal-arc">THE CRISPY GUARANTEE · FLAVORY · FRIED FRESH ·</textPath></text>
-          <path d="M78 101l15 15 30-33" fill="none" stroke="#1E0C29" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+        <svg class="seal-text" viewBox="0 0 260 260" data-spin aria-hidden="true">
+          <defs><path id="seal-arc" d="M130 130 m-118 0 a118 118 0 1 1 236 0 a118 118 0 1 1 -236 0"/></defs>
+          <text><textPath href="#seal-arc">THE CRISPY GUARANTEE · FRIED FRESH · FLAVORY · THE CRISPY GUARANTEE · FRIED FRESH · FLAVORY ·</textPath></text>
         </svg>
+        <svg class="seal-disc" viewBox="0 0 200 200" role="img" aria-label="Flavory crispy guarantee seal">
+          <path id="seal-edge" fill="#C9A45C"/>
+          <circle cx="100" cy="100" r="80" fill="none" stroke="#1E0C29" stroke-opacity=".4"/>
+          <circle cx="100" cy="100" r="66" fill="none" stroke="#1E0C29" stroke-opacity=".4" stroke-dasharray="2 4"/>
+          <path d="M72 102l18 18 38-42" fill="none" stroke="#1E0C29" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="seal-ring"></span>
       </div>
-      <h2 class="big-line" data-reveal>Not crispy when it arrives? We replace it free.</h2>
+      <p class="kicker" data-reveal>05 — The crispy guarantee</p>
+      <h2 class="big-line mt16" data-t1>Not crispy when it arrives? <em>We replace it free.</em></h2>
+      <p class="mt24" data-reveal><a class="link-arrow" href="/refund/">How replacements work</a></p>
     </div>
   </section>
 
   <section class="section alt">
     <div class="wrap">
-      <p class="kicker" data-reveal>Delivery & hours</p>
-      <h2 class="mt8" id="areas" data-reveal>Dhanmondi & Mohammadpur</h2>
-      <div class="info-grid">
-        <div data-reveal><h3>Hours</h3><p class="muted" id="hours">Every day, 12:00 pm – 10:00 pm</p></div>
-        <div class="d1" data-reveal><h3>Delivery</h3><p class="muted"><span id="free-over"></span> <a class="link" href="/delivery-faq/">See fees</a></p></div>
-        <div class="d2" data-reveal><h3>Kitchen</h3><p class="muted"><span id="kitchen">Lalmatia, Dhaka</span>. Order online, or call <a class="link" id="phone" href="tel:01726779404">01726-779404</a></p></div>
+      <p class="kicker" data-reveal>06 — Delivery &amp; hours</p>
+      <h2 class="mt16" id="areas" data-t1>Dhanmondi &amp; Mohammadpur</h2>
+      <div class="facts">
+        <div class="fact" data-reveal><strong id="hours">12 – 10 pm</strong><span>Open every day</span></div>
+        <div class="fact" data-reveal data-delay=".1"><strong id="fees">Tk 30 – 50</strong><span>Delivery fee by area</span></div>
+        <div class="fact" data-reveal data-delay=".2"><strong id="free-over">Free</strong><span id="free-note">Delivery on orders over Tk 500</span></div>
       </div>
+      <p class="mt24 muted" data-reveal>Kitchen in <span id="kitchen">Lalmatia, Dhaka</span>. Order online, or call <a class="link" id="phone" href="tel:01726779404">01726-779404</a>.</p>
     </div>
   </section>
 
   <section class="section" id="fb-section" hidden>
     <div class="wrap">
-      <div class="fb">
-        <div><h3>Follow us on Facebook</h3><p class="muted">See what is coming out of the kitchen.</p></div>
-        <a class="btn ghost" id="fb-link" rel="noopener noreferrer" target="_blank">Follow Flavory</a>
-      </div>
+      <div class="sec-head"><p class="kicker">Follow along</p><h2 data-t1>See what is coming out of the kitchen</h2></div>
+      <a class="btn ghost" id="fb-link" rel="noopener noreferrer" target="_blank">Follow Flavory on Facebook</a>
     </div>
   </section>
 
   <section class="section">
     <div class="wrap">
-      <p class="kicker" data-reveal>Reviews</p>
-      <h2 class="mt8" data-reveal>From our customers</h2>
+      <p class="kicker" data-reveal>07 — Reviews</p>
+      <h2 class="mt16" data-t1>From our <em>customers</em></h2>
       <div id="reviews"></div>
     </div>
   </section>

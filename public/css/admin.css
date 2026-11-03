@@ -79,3 +79,4 @@ body.admin { background: var(--ivory); color: var(--plum-900); color-scheme: lig
   .modal { align-items: center; }
   .modal > div { border-radius: 12px; }
 }
+.admin .btn::before { display: none; }

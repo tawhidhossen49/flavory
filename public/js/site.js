@@ -2,8 +2,10 @@
 import { cart } from './cart.js'
 import { SUPABASE_KEY, SUPABASE_URL } from './config.js'
 import { clock, esc, tk } from './format.js'
+import { flyToCart, reveal } from './motion.js'
 
 export { cardHtml, isSoldOut } from './site-card.js'
+export { reveal }
 
 const LINKS = [
   ['/menu', 'Menu'], ['/our-story', 'Our Story'], ['/reviews', 'Reviews'],
@@ -37,7 +39,11 @@ function renderFooter({ business: b, delivery: d }) {
   if (!el) return
   el.innerHTML = `
     <footer class="ftr"><div class="wrap">
-      <p class="script ftr-word" aria-hidden="true">Flavory</p>
+      <div class="ftr-cta">
+        <div><p class="kicker" data-reveal>Hungry?</p>
+        <h2 class="ftr-big" data-t1>Fried fresh, <em>right now.</em></h2></div>
+        <a href="/menu/" class="btn pill" data-magnetic data-reveal>Order now <i aria-hidden="true">→</i></a>
+      </div>
       <div class="ftr-cols">
         <div><h3>Hours</h3><p>Every day, ${clock(b.open)} – ${clock(b.close)}</p></div>
         <div><h3>We deliver to</h3><p>${esc(d.areas.map(a => a.name).join(' & '))}</p><p class="muted">Kitchen in ${esc(b.area_label)}</p></div>
@@ -50,7 +56,10 @@ function renderFooter({ business: b, delivery: d }) {
         </ul></div>
       </div>
       <p class="ftr-small">© ${new Date().getFullYear()} Flavory, Dhaka.</p>
-    </div></footer>`
+    </div>
+    <div class="ftr-word-wrap" aria-hidden="true"><p class="ftr-word" data-chars>Flavory</p></div>
+    </footer>`
+  reveal()
 }
 
 function renderCartBar() {
@@ -77,15 +86,6 @@ function renderCartBar() {
   }
   paint()
   cart.subscribe(paint)
-}
-
-export function reveal() {
-  const io = new IntersectionObserver(entries => {
-    for (const e of entries) {
-      if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target) }
-    }
-  }, { rootMargin: '0px 0px -8% 0px', threshold: 0.12 })
-  document.querySelectorAll('[data-reveal]:not(.in), [data-seal]:not(.in)').forEach(el => io.observe(el))
 }
 
 // Only http(s) links from settings may reach an href.
@@ -140,7 +140,7 @@ export function bindCards(root, items) {
   root.addEventListener('change', e => {
     const card = e.target.closest('.card')
     const item = byId.get(card?.dataset.item)
-    if (item) card.querySelector('[data-add]').textContent = `Add · ${tk(chosen(card, item).price)}`
+    if (item) card.querySelector('.add-label').textContent = `Add · ${tk(chosen(card, item).price)}`
   })
   root.addEventListener('click', e => {
     const btn = e.target.closest('[data-add]')
@@ -149,9 +149,12 @@ export function bindCards(root, items) {
     const item = byId.get(card.dataset.item)
     const o = chosen(card, item)
     cart.add({ option_id: o.id, item_id: item.id, name: item.name, label: o.label, price: o.price, photo: item.photos[0] ?? null })
-    btn.textContent = 'Added'
+    flyToCart(btn)
+    const label = btn.querySelector('.add-label')
+    label.textContent = 'Added'
+    btn.classList.add('is-added')
     clearTimeout(btn._t)
-    btn._t = setTimeout(() => { btn.textContent = `Add · ${tk(chosen(card, item).price)}` }, 1400)
+    btn._t = setTimeout(() => { label.textContent = `Add · ${tk(chosen(card, item).price)}`; btn.classList.remove('is-added') }, 1400)
   })
 }
 
